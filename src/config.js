@@ -103,5 +103,34 @@ export const CONFIG = {
       "Hồng trà bé xíu: bé xíu thôi nhưng thương em thật nhiều 💕",
       "Gửi em một nụ hôn thơm mùi hoa 😘"
     ]
-  }
+  },
+
+  // 7. 5 LỜI THÌ THẦM BÍ MẬT KHI KHÁM PHÁ HOA TRÊN BÓ HOA 3D
+  secretWhispers: [
+    {
+      id: 0,
+      title: "Đóa Hồng Ohara Rực Rỡ",
+      text: "Cảm ơn em đã bước vào cuộc đời anh, biến những ngày bình thường thành ngày ngập tràn ánh nắng và hạnh phúc. 🌹"
+    },
+    {
+      id: 1,
+      title: "Mẫu Đơn Đào Ngọt Ngào",
+      text: "Nụ cười của em là điều ngọt ngào nhất thế gian. Chỉ cần thấy em cười, mọi mệt mỏi trong anh đều tan biến. 🌸"
+    },
+    {
+      id: 7,
+      title: "Đóa Tulip Cam Rạng Rỡ",
+      text: "Tình yêu anh dành cho em chân thành và sâu đậm như chính sắc màu rạng rỡ của đóa hoa này. 🌷"
+    },
+    {
+      id: 9,
+      title: "Hồng Trà Dịu Dàng",
+      text: "Dù ngoài kia thế giới có bao la rộng lớn, nơi chốn bình yên nhất của anh luôn là khi được ở bên em. 💕"
+    },
+    {
+      id: 11,
+      title: "Đóa Tana Thuần Khiết",
+      text: "Em là cô gái tuyệt vời nhất! Anh đã giấu một bức thư tình sâu trong đáy tim... Bức thư đã xuất hiện rồi đó! 💌"
+    }
+  ]
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, Calendar, Gift, CheckCircle2, RotateCcw, ExternalLink } from 'lucide-react';
+import { Heart, Sparkles, Calendar, Gift, CheckCircle2, RotateCcw, ExternalLink, ArrowLeft } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { audioManager } from '../utils/audio';
 
@@ -110,8 +110,20 @@ export default function SceneLetter({ config, onReplay }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="relative z-10 w-full max-w-3xl mx-auto px-4 py-8 flex flex-col items-center"
+      className="relative z-10 w-full max-w-3xl mx-auto px-4 py-6 flex flex-col items-center"
     >
+      {/* Return to 3D bouquet button */}
+      <div className="w-full flex justify-between items-center mb-4">
+        <button
+          onClick={onReplay}
+          className="inline-flex items-center gap-1.5 px-4 py-1.8 rounded-full bg-white/85 hover:bg-white text-rose-700 hover:text-rose-900 text-xs sm:text-sm font-semibold border border-rose-200/90 shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+          title="Quay lại ngắm bó hoa 3D"
+        >
+          <ArrowLeft className="w-4 h-4 text-rose-500" />
+          <span>Quay lại ngắm bó hoa 3D 💐</span>
+        </button>
+      </div>
+
       {/* If envelope is NOT opened yet */}
       {!isOpen ? (
         <div className="flex flex-col items-center justify-center min-h-[75vh] text-center">

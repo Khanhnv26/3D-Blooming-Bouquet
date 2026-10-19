@@ -21,41 +21,15 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden bg-gradient-to-b from-rose-50 via-pink-50/50 to-amber-50/40 text-stone-800 flex flex-col justify-between selection:bg-rose-200 selection:text-rose-900">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-gradient-to-b from-[#fff7ed] via-[#fee2e2]/50 to-[#fdf2f8] text-stone-800 flex flex-col justify-between selection:bg-rose-200 selection:text-rose-900">
+      {/* Studio Radial Warm Spotlight for the Bouquet */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle_at_50%_42%,rgba(254,240,138,0.25)_0%,rgba(253,164,175,0.15)_45%,transparent_75%)]" />
+
       {/* Dynamic Romantic Background Canvas (Petals, Fireflies, Sparkles) */}
       <BackgroundCanvas />
 
       {/* Music Player Disc (Top Right) */}
       <MusicPlayer audioUrl={CONFIG.audioUrl} songTitle={CONFIG.songTitle} />
-
-      {/* Top Floating Step Indicator */}
-      <header className="relative z-20 pt-5 px-4 flex justify-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-rose-200/80 shadow-xs">
-          <button
-            onClick={() => setCurrentScene(1)}
-            className={`text-xs font-semibold px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
-              currentScene === 1
-                ? 'bg-rose-500 text-white shadow-xs'
-                : 'text-stone-500 hover:text-rose-600'
-            }`}
-          >
-            <span>1.</span> Đóa Hoa Nở 🌹
-          </button>
-
-          <span className="text-rose-300 text-xs">→</span>
-
-          <button
-            onClick={() => setCurrentScene(2)}
-            className={`text-xs font-semibold px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
-              currentScene === 2
-                ? 'bg-rose-500 text-white shadow-xs'
-                : 'text-stone-500 hover:text-rose-600'
-            }`}
-          >
-            <span>2.</span> Tâm Thư Tình 💌
-          </button>
-        </div>
-      </header>
 
       {/* Main Interactive Stage with AnimatePresence Transitions */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center w-full py-4">

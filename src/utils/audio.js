@@ -150,6 +150,44 @@ class RomanticAudioManager {
     }
   }
 
+  playCollectSound() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      if (!this.audioCtx) this.audioCtx = new AudioContext();
+      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+
+      // Sparkling high chime arpeggio
+      const notes = [659.25, 783.99, 1046.5, 1318.51];
+      notes.forEach((freq, i) => {
+        setTimeout(() => {
+          this.playTone(freq, 0.7);
+        }, i * 70);
+      });
+    } catch {
+      // ignore
+    }
+  }
+
+  playMagicFanfare() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      if (!this.audioCtx) this.audioCtx = new AudioContext();
+      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+
+      // Celebratory magical fanfare harp glissando
+      const fanfareNotes = [392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+      fanfareNotes.forEach((freq, i) => {
+        setTimeout(() => {
+          this.playTone(freq, 1.2);
+        }, i * 85);
+      });
+    } catch {
+      // ignore
+    }
+  }
+
   playWaterSound() {
     try {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
