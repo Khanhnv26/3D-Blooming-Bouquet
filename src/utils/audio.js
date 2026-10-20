@@ -95,6 +95,24 @@ class RomanticAudioManager {
     return this.isPlaying;
   }
 
+  warmUp() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      if (!this.audioCtx) this.audioCtx = new AudioContext();
+      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+      osc.start();
+      osc.stop(this.audioCtx.currentTime + 0.02);
+    } catch {
+
+    }
+  }
+
   startRomanticSynth() {
     if (this.synthInterval) return;
 

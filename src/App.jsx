@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { CONFIG } from './config';
 import MusicPlayer from './components/MusicPlayer';
@@ -11,10 +11,10 @@ export default function App() {
   const [hasEntered, setHasEntered] = useState(false);
   const [currentScene, setCurrentScene] = useState(1); 
 
-  const handleNextScene = () => {
+  const handleNextScene = useCallback(() => {
     setCurrentScene(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
   const handleReplay = () => {
     setCurrentScene(1);

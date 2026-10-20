@@ -11,6 +11,8 @@ export default function PreloaderScreen({ config, onComplete }) {
 
   useEffect(() => {
     audioManager.init(config?.audioUrl || '/music.mp3');
+    confetti({ particleCount: 0 });
+    import('./Bouquet3D');
 
     const timer = setInterval(() => {
       setProgress((prev) => {
@@ -44,6 +46,7 @@ export default function PreloaderScreen({ config, onComplete }) {
     if (isOpening) return;
     setIsOpening(true);
 
+    audioManager.warmUp();
     audioManager.play();
     audioManager.playMagicFanfare();
 

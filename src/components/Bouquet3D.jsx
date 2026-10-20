@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Sparkles, ContactShadows, Html } from '@react-three/drei';
@@ -432,10 +432,21 @@ function QuestBeacon({ active, collected }) {
         </mesh>
       </group>
 
-      <pointLight color="#fde047" intensity={0.65} distance={1.2} decay={2} />
+      <mesh raycast={() => null}>
+        <sphereGeometry args={[0.34, 14, 10]} />
+        <meshBasicMaterial
+          color="#fde047"
+          transparent
+          opacity={active ? 0.26 : 0.16}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
     </group>
   );
 }
+
+const noRaycast = () => null;
 
 const Flower = memo(function Flower({ data, active, isQuest, isCollected, onPick, startRef }) {
   const { id, kind, dir, pos, quat, roll, delay } = data;
@@ -541,20 +552,20 @@ const Flower = memo(function Flower({ data, active, isQuest, isCollected, onPick
                       petals.current[idx] = el;
                     }}
                   >
-                    <mesh geometry={geoms[li]} material={mats[li]} />
+                    <mesh geometry={geoms[li]} material={mats[li]} raycast={noRaycast} />
                   </group>
                 </group>
               );
             })
           )}
           {spec.center && (
-            <mesh position-y={0.06} scale={[1, 0.65, 1]}>
+            <mesh position-y={0.06} scale={[1, 0.65, 1]} raycast={noRaycast}>
               <sphereGeometry args={[0.13, 16, 12]} />
               <meshStandardMaterial color={spec.center} roughness={0.35} emissive="#f59e0b" emissiveIntensity={0.4} />
             </mesh>
           )}
           {spec.sepal > 0 && (
-            <mesh position-y={-0.01} scale={[1, 0.45, 1]}>
+            <mesh position-y={-0.01} scale={[1, 0.45, 1]} raycast={noRaycast}>
               <sphereGeometry args={[spec.sepal, 12, 10]} />
               <meshStandardMaterial color="#2d5a27" roughness={0.8} />
             </mesh>
@@ -604,7 +615,7 @@ function makePaper(rTop, rBot, h, flutes, amp, rimWave) {
   return g;
 }
 
-function Paper({ startRef }) {
+const Paper = memo(function Paper({ startRef }) {
   const group = useRef();
   const geos = useMemo(
     () => ({
@@ -679,9 +690,9 @@ function Paper({ startRef }) {
       <mesh geometry={geos.sleeve} material={mats.sleeve} position-y={0.90} rotation-y={0.2} />
     </group>
   );
-}
+});
 
-function Greenery() {
+const Greenery = memo(function Greenery() {
   const leafGeo = useMemo(() => makeEucalyptusLeaf(0.19, 0.29), []);
   const leafMat = useMemo(() => {
     const noise = getSharedTextures().noise;
@@ -746,9 +757,9 @@ function Greenery() {
       ))}
     </group>
   );
-}
+});
 
-function BabyBreath() {
+const BabyBreath = memo(function BabyBreath() {
   const mesh = useRef();
   const COUNT = 65; 
   const PER = 3;
@@ -817,7 +828,7 @@ function BabyBreath() {
       />
     </instancedMesh>
   );
-}
+});
 
 function makeRibbonLoop(width = 0.14, segV = 36, segU = 6) {
   const g = new THREE.BufferGeometry();
@@ -933,7 +944,7 @@ function makeRibbonKnot() {
   return g;
 }
 
-function Ribbon() {
+const Ribbon = memo(function Ribbon() {
   const mat = useMemo(() => {
     const noise = getSharedTextures().noise;
     return new THREE.MeshPhysicalMaterial({
@@ -986,9 +997,9 @@ function Ribbon() {
       </group>
     </group>
   );
-}
+});
 
-function Fireflies3D() {
+const Fireflies3D = memo(function Fireflies3D() {
   const pointsRef = useRef();
   const COUNT = 42;
   const bokehTex = useMemo(() => getSharedTextures().bokeh, []);
@@ -1064,9 +1075,9 @@ function Fireflies3D() {
       />
     </points>
   );
-}
+});
 
-function FallingPetals({ startRef }) {
+const FallingPetals = memo(function FallingPetals({ startRef }) {
   const N = 48;
   const mesh = useRef();
   const geo = useMemo(() => makePetal({ w: 0.08, l: 0.16, cup: 0.3, curl: 0.1, seg: [3, 4] }), []);
@@ -1121,7 +1132,7 @@ function FallingPetals({ startRef }) {
   });
 
   return <instancedMesh ref={mesh} args={[geo, mat, N]} frustumCulled={false} />;
-}
+});
 
 function FloatingEnvelopeInner({ onOpenLetter }) {
   const groupRef = useRef();
@@ -1545,6 +1556,13 @@ function Scene({
 
       <directionalLight position={[0, -1.5, 2.5]} intensity={0.65} color="#fed7aa" />
 
+      {!isLetterRevealed && (
+        <>
+          <spotLight position={[0, 5, 2]} intensity={0} />
+          <pointLight position={[0, 0, 0]} intensity={0} />
+        </>
+      )}
+
       <Fireflies3D />
 
       <Rig startRef={startRef}>
@@ -1573,7 +1591,7 @@ function Scene({
 
       <FallingPetals startRef={startRef} />
 
-      <ContactShadows position={[0, -2.18, 0]} opacity={0.55} scale={7.2} blur={3.2} far={3.8} color="#0d0918" />
+      <ContactShadows position={[0, -2.18, 0]} opacity={0.55} scale={7.2} blur={3.2} far={3.8} resolution={256} color="#0d0918" />
 
       <ResponsiveCamera />
 
@@ -1631,7 +1649,7 @@ export default function Bouquet3D({
   return (
     <Canvas
       camera={{ position: [0, 1.85, 7.3], fov: 38 }}
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: true }}
       style={{ touchAction: 'none', width: '100%', height: '100%' }}
     >

@@ -46,6 +46,8 @@ export default function SceneBloom({ onNext, recipientName }) {
 
   const clearTimer = useRef(null);
   const idleTimer = useRef(null);
+  const collectedRef = useRef([]);
+  const letterRevealedRef = useRef(false);
 
   const whisperMap = useMemo(() => {
     const map = {};
@@ -92,10 +94,13 @@ export default function SceneBloom({ onNext, recipientName }) {
 
   const handlePick = useCallback(
     (kind, id) => {
+      const collected = collectedRef.current;
+      const letterRevealed = letterRevealedRef.current;
+
       setActiveId(id);
 
       const isQuest = QUEST_IDS.includes(id);
-      const isNewQuest = isQuest && !collectedIds.includes(id);
+      const isNewQuest = isQuest && !collected.includes(id);
 
       let text = '';
       let title = 'Lời thì thầm từ đóa hoa';
@@ -110,27 +115,31 @@ export default function SceneBloom({ onNext, recipientName }) {
 
       setMessage({ id, title, text, isQuest });
 
-      let nextCollected = collectedIds;
+      let nextCollected = collected;
       if (isNewQuest) {
-        nextCollected = [...collectedIds, id];
+        nextCollected = [...collected, id];
+        collectedRef.current = nextCollected;
         setCollectedIds(nextCollected);
-        audioManager.playCollectSound();
-
-        confetti({
-          particleCount: 30,
-          spread: 60,
-          origin: { y: 0.4 },
-          colors: ['#fbbf24', '#f43f5e', '#f472b6'],
-        });
+        setTimeout(() => {
+          audioManager.playCollectSound();
+          confetti({
+            particleCount: 30,
+            spread: 60,
+            origin: { y: 0.4 },
+            colors: ['#fbbf24', '#f43f5e', '#f472b6'],
+            disableForReducedMotion: true,
+          });
+        }, 0);
       } else {
-        audioManager.playChime();
+        setTimeout(() => audioManager.playChime(), 0);
       }
 
-      if (nextCollected.length >= QUEST_IDS.length && !isLetterRevealed) {
+      if (nextCollected.length >= QUEST_IDS.length && !letterRevealed) {
+        letterRevealedRef.current = true;
         setIsLetterRevealed(true);
         setActiveId(null);
         setMessage(null);
-        audioManager.playMagicFanfare();
+        setTimeout(() => audioManager.playMagicFanfare(), 0);
 
         setTimeout(() => {
           confetti({
@@ -151,7 +160,7 @@ export default function SceneBloom({ onNext, recipientName }) {
         setMessage(null);
       }, 4200);
     },
-    [collectedIds, isLetterRevealed, whisperMap, handleInteractStart, handleInteractEnd]
+    [whisperMap, handleInteractStart, handleInteractEnd]
   );
 
   const handleOpenLetter = useCallback(() => {
@@ -166,6 +175,8 @@ export default function SceneBloom({ onNext, recipientName }) {
   }, [onNext]);
 
   const handleReplay = () => {
+    collectedRef.current = [];
+    letterRevealedRef.current = false;
     setActiveId(null);
     setMessage(null);
     setCollectedIds([]);
@@ -225,7 +236,7 @@ export default function SceneBloom({ onNext, recipientName }) {
             className="relative z-10 pt-3 px-4 text-center pointer-events-auto"
           >
 
-            <div className="inline-flex items-center gap-2 px-4 py-1.8 rounded-full bg-stone-900/85 backdrop-blur-md border border-rose-500/35 shadow-xl">
+            <div className="inline-flex items-center gap-2 px-4 py-1.8 rounded-full bg-stone-900/90 border border-rose-500/35 shadow-xl">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
               <span className="text-xs font-semibold text-rose-200">
                 Khám phá 5 đóa hoa phát sáng ({collectedCount}/5):
@@ -256,7 +267,7 @@ export default function SceneBloom({ onNext, recipientName }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -15, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 320, damping: 22 }}
-            className="absolute top-24 sm:top-28 z-30 inset-x-4 mx-auto max-w-md px-5 py-3.5 rounded-2xl bg-stone-900/90 backdrop-blur-xl border border-rose-400/40 shadow-2xl shadow-rose-900/60 text-center pointer-events-none"
+            className="absolute top-24 sm:top-28 z-30 inset-x-4 mx-auto max-w-md px-5 py-3.5 rounded-2xl bg-stone-900/95 border border-rose-400/40 shadow-2xl shadow-rose-900/60 text-center pointer-events-none"
           >
             <div className="flex items-center justify-center gap-1.5 mb-1 text-xs text-rose-400 font-bold uppercase tracking-wider">
               <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-400" />
@@ -279,13 +290,13 @@ export default function SceneBloom({ onNext, recipientName }) {
             className="relative z-10 pb-6 px-4 w-full flex items-center justify-center"
           >
             <div className="flex items-center gap-2">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-900/80 backdrop-blur-md border border-rose-500/30 text-xs font-semibold text-rose-200 shadow-md">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-900/90 border border-rose-500/30 text-xs font-semibold text-rose-200 shadow-md">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span>Chạm vào các đóa hoa có đốm sáng để mở bức thư tình bí mật 🌸</span>
               </div>
               <button
                 onClick={handleReplay}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-stone-900/80 hover:bg-stone-800 text-rose-300 text-xs font-semibold border border-rose-500/30 shadow-md backdrop-blur-md transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-stone-900/80 hover:bg-stone-800 text-rose-300 text-xs font-semibold border border-rose-500/30 shadow-md transition-colors cursor-pointer"
                 title="Xem lại hiệu ứng bung nở hoa 3D"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
