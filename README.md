@@ -86,7 +86,7 @@ Chỉnh đối tượng `CONFIG` trong `src/config.js`:
 - `senderName`: tên người gửi, dùng làm chữ ký cuối thư.
 - `occasion`: tên dịp lễ trên màn mở quà.
 - `audioUrl`: đường dẫn nhạc nền, mặc định `/music.mp3`.
-- `songTitle`: tên bài nhạc hiển thị trên trình phát.
+- `songTitle`: tên bài nhạc hiển thị trên trình phát (mặc định: `In Love Remix - Low G ft Justatee (Prod.Cookconbeatnodumcaide)`).
 - `letter.salutation`: lời mở đầu bức thư.
 - `letter.paragraphs`: mảng các đoạn thư, lần lượt xuất hiện bằng hiệu ứng gõ chữ.
 - `letter.closing`: lời kết thư.
@@ -114,6 +114,7 @@ letter: {
 
 ### Thay nhạc và tiêu đề trang
 
+- Nhạc nền mặc định trong `public/music.mp3` là bài hát **In Love Remix - Low G ft Justatee (Prod.Cookconbeatnodumcaide)**.
 - Thay `public/music.mp3` bằng bài nhạc của bạn, hoặc thêm file vào `public/` và sửa `audioUrl`. Ví dụ `public/bai-hat.mp3` tương ứng với `audioUrl: "/bai-hat.mp3"`.
 - Nhạc bắt đầu sau thao tác của người dùng, như chạm mở hộp quà. Nếu chưa nghe thấy, dùng nút bật nhạc ở góc trên bên phải.
 - Sửa thẻ `<title>` và favicon trong `index.html` để đổi tên và biểu tượng trên tab trình duyệt.
@@ -122,7 +123,7 @@ letter: {
 
 ```text
 public/
-  music.mp3               # Nhạc nền mặc định
+  music.mp3               # Nhạc nền mặc định (In Love Remix - Low G ft Justatee)
 src/
   App.jsx                 # Điều phối màn mở quà, bó hoa và thư
   config.js               # Cấu hình nội dung

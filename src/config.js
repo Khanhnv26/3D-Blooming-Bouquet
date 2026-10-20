@@ -7,7 +7,7 @@ export const CONFIG = {
   anniversaryDate: "2026-10-20", 
 
   audioUrl: "/music.mp3",
-  songTitle: "Giai điệu ngọt ngào 20.10",
+  songTitle: "In Love Remix - Low G ft Justatee (Prod.Cookconbeatnodumcaide)",
 
   letter: {
     salutation: "Gửi công chúa nhỏ của anh,",
