@@ -5,9 +5,6 @@ import { OrbitControls, Sparkles, ContactShadows, Html } from '@react-three/drei
 import confetti from 'canvas-confetti';
 import { audioManager } from '../utils/audio';
 
-/* ------------------------------------------------------------------ */
-/* Math & Animation Helpers                                            */
-/* ------------------------------------------------------------------ */
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
 const smooth = (x) => x * x * (3 - 2 * x);
 const easeOutBack = (x) => {
@@ -25,9 +22,6 @@ function rng(seed) {
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
-/* ------------------------------------------------------------------ */
-/* 1. Procedural In-Memory Canvas Textures (Micro-noise & Soft Bokeh)  */
-/* ------------------------------------------------------------------ */
 function createPaperNoiseTexture() {
   if (typeof document === 'undefined') return null;
   const size = 512;
@@ -38,7 +32,6 @@ function createPaperNoiseTexture() {
   const imgData = ctx.createImageData(size, size);
   const data = imgData.data;
 
-  // Multi-scale micro noise simulating fine cotton paper tooth & woven textile fibers
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const idx = (y * size + x) * 4;
@@ -70,11 +63,11 @@ function createBokehTexture() {
   const ctx = canvas.getContext('2d');
 
   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  gradient.addColorStop(0.0, 'rgba(255, 252, 235, 1.0)'); // luminous warm white-gold center
-  gradient.addColorStop(0.25, 'rgba(253, 224, 71, 0.85)'); // golden aura
-  gradient.addColorStop(0.55, 'rgba(251, 146, 60, 0.35)'); // warm sunset amber
-  gradient.addColorStop(0.85, 'rgba(244, 63, 94, 0.08)');  // soft feathered rose fringe
-  gradient.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');        // transparent fade
+  gradient.addColorStop(0.0, 'rgba(255, 252, 235, 1.0)'); 
+  gradient.addColorStop(0.25, 'rgba(253, 224, 71, 0.85)'); 
+  gradient.addColorStop(0.55, 'rgba(251, 146, 60, 0.35)'); 
+  gradient.addColorStop(0.85, 'rgba(244, 63, 94, 0.08)');  
+  gradient.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');        
 
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, size, size);
@@ -97,17 +90,16 @@ function createSpotlightBeamTexture() {
   const data = imgData.data;
 
   for (let y = 0; y < h; y++) {
-    const v = y / (h - 1); // 0 at top apex, 1 at bottom base
-    // Smooth bell curve fading to EXACT ZERO at both apex and base:
-    // sin(pi * v)^1.4 reaches 0 at v=0 and v=1 with zero hard cutoffs
+    const v = y / (h - 1); 
+
     const vertFade = Math.pow(Math.sin(v * Math.PI), 1.4);
 
     for (let x = 0; x < w; x++) {
       const idx = (y * w + x) * 4;
-      data[idx] = 254;     // R: warm golden champagne
-      data[idx + 1] = 230; // G
-      data[idx + 2] = 175; // B
-      data[idx + 3] = Math.round(vertFade * 255); // Alpha
+      data[idx] = 254;     
+      data[idx + 1] = 230; 
+      data[idx + 2] = 175; 
+      data[idx + 3] = Math.round(vertFade * 255); 
     }
   }
   ctx.putImageData(imgData, 0, 0);
@@ -128,11 +120,9 @@ function createParchmentLetterTexture() {
   canvas.height = h;
   const ctx = canvas.getContext('2d');
 
-  // 1. Luxury ivory parchment paper base
   ctx.fillStyle = '#fffdf7';
   ctx.fillRect(0, 0, w, h);
 
-  // 2. Soft warm paper vignette
   const grad = ctx.createRadialGradient(w / 2, h / 2, 60, w / 2, h / 2, w / 1.5);
   grad.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
   grad.addColorStop(0.65, 'rgba(254, 243, 199, 0.4)');
@@ -140,7 +130,6 @@ function createParchmentLetterTexture() {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, w, h);
 
-  // 3. Double gold filigree frame
   ctx.strokeStyle = '#d97706';
   ctx.lineWidth = 3;
   ctx.strokeRect(18, 18, w - 36, h - 36);
@@ -149,7 +138,6 @@ function createParchmentLetterTexture() {
   ctx.lineWidth = 1;
   ctx.strokeRect(24, 24, w - 48, h - 48);
 
-  // Corner decorative flourishes
   ctx.fillStyle = '#d97706';
   [
     [24, 24],
@@ -162,7 +150,6 @@ function createParchmentLetterTexture() {
     ctx.fill();
   });
 
-  // 4. Romantic cursive calligraphy lines (mimicking handwritten love letter)
   ctx.fillStyle = '#92400e';
   ctx.font = 'bold 22px "Playfair Display", serif';
   ctx.textAlign = 'center';
@@ -172,7 +159,6 @@ function createParchmentLetterTexture() {
   ctx.font = '16px serif';
   ctx.fillText('❦ 20.10 ❦', w / 2, 90);
 
-  // Handwritten cursive wavy lines
   ctx.strokeStyle = 'rgba(120, 53, 15, 0.55)';
   ctx.lineWidth = 2;
   ctx.lineCap = 'round';
@@ -196,7 +182,6 @@ function createParchmentLetterTexture() {
     ctx.stroke();
   });
 
-  // Signature at bottom right
   ctx.fillStyle = '#b45309';
   ctx.font = 'italic 16px "Dancing Script", cursive';
   ctx.textAlign = 'right';
@@ -220,9 +205,6 @@ function getSharedTextures() {
   return cachedTextures || { noise: null, bokeh: null, beam: null, letter: null };
 }
 
-/* ------------------------------------------------------------------ */
-/* Procedural Velvet Petal Geometry with Natural Curvature & Ruffles  */
-/* ------------------------------------------------------------------ */
 function makePetal({ w, l, cup = 0.52, curl = 0.28, ruffle = 0, seg = [12, 14] }) {
   const g = new THREE.PlaneGeometry(1, 1, seg[0], seg[1]);
   const pos = g.attributes.position;
@@ -230,15 +212,13 @@ function makePetal({ w, l, cup = 0.52, curl = 0.28, ruffle = 0, seg = [12, 14] }
 
   for (let i = 0; i < pos.count; i++) {
     const u = pos.getX(i);
-    const v = clamp(pos.getY(i) + 0.5, 0, 1); // 0 (base) to 1 (tip) safely clamped!
+    const v = clamp(pos.getY(i) + 0.5, 0, 1); 
 
-    // Elliptical teardrop petal profile with natural taper
     const prof = Math.pow(Math.max(0, Math.sin(Math.PI * (0.07 + 0.93 * v))), 0.6);
     const nx = 2 * u * prof;
     const x = nx * w;
     const y = v * l;
 
-    // Organic double-curvature bowl + tip curl + edge ripple
     const z =
       -cup * w * nx * nx * (0.45 + 0.85 * v) +
       curl * l * Math.pow(v, 2.5) +
@@ -246,7 +226,6 @@ function makePetal({ w, l, cup = 0.52, curl = 0.28, ruffle = 0, seg = [12, 14] }
 
     pos.setXYZ(i, x, y, z);
 
-    // Natural gradient: deeper at the petal base, radiant towards the rim
     const shade = 0.76 + 0.24 * Math.pow(v, 0.65);
     colors[i * 3] = shade;
     colors[i * 3 + 1] = shade * 0.96;
@@ -258,22 +237,17 @@ function makePetal({ w, l, cup = 0.52, curl = 0.28, ruffle = 0, seg = [12, 14] }
   return g;
 }
 
-/* ------------------------------------------------------------------ */
-/* Procedural 3D Curved Botanical Leaf Geometry (Lá bo tròn mềm mại)   */
-/* ------------------------------------------------------------------ */
 function makeEucalyptusLeaf(w, l) {
   const g = new THREE.PlaneGeometry(1, 1, 14, 16);
   const pos = g.attributes.position;
   for (let i = 0; i < pos.count; i++) {
-    const rawX = pos.getX(i); // -0.5 to 0.5
-    const v = clamp(pos.getY(i) + 0.5, 0, 1); // 0 (base) to 1 (tip)
+    const rawX = pos.getX(i); 
+    const v = clamp(pos.getY(i) + 0.5, 0, 1); 
 
-    // Smooth organic teardrop profile: tapered base, rounded belly, soft pointed tip
     const profile = Math.sin(v * Math.PI) * Math.pow(1.0 - v * 0.32, 0.45);
     const x = rawX * w * 2.0 * profile;
     const y = (v - 0.5) * l;
 
-    // Organic 3D curvature: arches naturally backwards + soft central crease
     const arch = -0.045 * Math.sin(v * Math.PI) * l;
     const uNorm = rawX * 2.0;
     const veinCrease = 0.02 * (1.0 - Math.abs(uNorm)) * Math.sin(v * Math.PI);
@@ -285,9 +259,6 @@ function makeEucalyptusLeaf(w, l) {
   return g;
 }
 
-/* ------------------------------------------------------------------ */
-/* Botanical Flower Specifications & Palette Definitions               */
-/* ------------------------------------------------------------------ */
 const L = (n, r, l, w, t0, t1, color, extra = {}) => ({
   n,
   r,
@@ -310,19 +281,19 @@ const SPECS = {
   rose: {
     scale: 0.66,
     sepal: 0.14,
-    // Deep Velvet Ohara Rose: Crimson core blooming to radiant coral blush
+
     layers: ROSE_LAYERS(['#7f1d1d', '#991b1b', '#be123c', '#e11d48', '#fb7185']),
   },
   spray: {
     scale: 0.40,
     sepal: 0.11,
-    // Sweet Coral Spray Rose
+
     layers: ROSE_LAYERS(['#9f1239', '#e11d48', '#f43f5e', '#fb7185', '#fce7f3']),
   },
   peony: {
     scale: 0.63,
     sepal: 0.16,
-    // Lush Peach & Milk Cream Peony
+
     layers: [
       L(5, 0.02, 0.32, 0.18, 0.1, 0.3, '#c2410c', { cup: 0.78, ruffle: 0.04, curl: 0.2 }),
       L(6, 0.04, 0.42, 0.23, 0.2, 0.5, '#ea580c', { cup: 0.68, ruffle: 0.05, curl: 0.25 }),
@@ -335,7 +306,7 @@ const SPECS = {
   tulip: {
     scale: 0.58,
     sepal: 0,
-    // Sunrise Coral Tulip
+
     layers: [
       L(3, 0.05, 0.88, 0.3, 0.08, 0.32, '#b91c1c', { cup: 0.95, curl: 0.16, off: 0 }),
       L(3, 0.04, 0.82, 0.28, 0.04, 0.22, '#f43f5e', { cup: 0.95, curl: 0.14, off: Math.PI / 3 }),
@@ -345,7 +316,7 @@ const SPECS = {
     scale: 0.66,
     sepal: 0.12,
     center: '#d97706',
-    // Warm Buttercream Chamomile Daisy with Deep Golden Center (Crisp separation from ivory wrap)
+
     layers: [
       L(16, 0.07, 0.45, 0.092, 0.7, 1.4, '#fef08a', { cup: 0.22, curl: 0.20 }),
       L(14, 0.06, 0.39, 0.092, 0.6, 1.32, '#fef9c3', { cup: 0.22, curl: 0.20, off: 0.2 }),
@@ -353,26 +324,20 @@ const SPECS = {
   },
 };
 
-/* ------------------------------------------------------------------ */
-/* 16 Flowers Balanced Florist Layout (Thoáng đãng, có khoảng thở)    */
-/* ------------------------------------------------------------------ */
 const DOME_CENTER = new THREE.Vector3(0, -0.02, 0);
 const DOME_R = 1.70;
 const STEM_BASE = new THREE.Vector3(0, -2.15, 0);
 
-// 3 Balanced Tiers: 1 Center Crown + 5 Upper Ring + 10 Lower Collar
 const FLOWER_TIERS = [
-  // Tier 1: Center Crown (Polar = 0°)
+
   { id: 0, kind: 'rose', polar: 0, az: 0 },
 
-  // Tier 2: Upper Ring (5 flowers, Polar = 26°, 72° apart)
   { id: 1, kind: 'peony', polar: 26, az: 0 },
   { id: 2, kind: 'tulip', polar: 26, az: 72 },
   { id: 3, kind: 'rose', polar: 26, az: 144 },
   { id: 4, kind: 'peony', polar: 26, az: 216 },
   { id: 5, kind: 'spray', polar: 26, az: 288 },
 
-  // Tier 3: Lower Collar Ring (10 flowers, Polar = 54°, 36° apart, offset 18°)
   { id: 6, kind: 'peony', polar: 54, az: 18 },
   { id: 7, kind: 'tulip', polar: 54, az: 54 },
   { id: 8, kind: 'rose', polar: 54, az: 90 },
@@ -398,9 +363,6 @@ const FLOWERS = FLOWER_TIERS.map((f, i) => {
   return { id: f.id, kind: f.kind, dir, pos, quat, roll: (i * 1.7) % (Math.PI * 2), delay: 0.35 + (f.polar / 60) * 0.45 };
 });
 
-/* ------------------------------------------------------------------ */
-/* Stems                                                               */
-/* ------------------------------------------------------------------ */
 const Stem = memo(function Stem({ to }) {
   const { pos, quat, len } = useMemo(() => {
     const d = to.clone().sub(STEM_BASE);
@@ -420,9 +382,6 @@ const Stem = memo(function Stem({ to }) {
   );
 });
 
-/* ------------------------------------------------------------------ */
-/* Quest Beacon (Đốm sao vàng lấp lánh dẫn lối người thương)          */
-/* ------------------------------------------------------------------ */
 function QuestBeacon({ active, collected }) {
   const haloRef = useRef();
   const starRef = useRef();
@@ -454,13 +413,12 @@ function QuestBeacon({ active, collected }) {
 
   return (
     <group position-y={0.38}>
-      {/* Outer pulsing beacon ring */}
+
       <mesh ref={haloRef} rotation-x={Math.PI / 2}>
         <ringGeometry args={[0.18, 0.26, 28]} />
         <meshBasicMaterial color="#fbbf24" transparent opacity={active ? 0.95 : 0.75} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* Floating 3D golden star diamond */}
       <group ref={starRef}>
         <mesh scale={[0.09, 0.14, 0.09]}>
           <octahedronGeometry args={[1, 0]} />
@@ -479,9 +437,6 @@ function QuestBeacon({ active, collected }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Individual Flower Component with Velvet Shading & Touch Target     */
-/* ------------------------------------------------------------------ */
 const Flower = memo(function Flower({ data, active, isQuest, isCollected, onPick, startRef }) {
   const { id, kind, dir, pos, quat, roll, delay } = data;
   const spec = SPECS[kind];
@@ -605,13 +560,11 @@ const Flower = memo(function Flower({ data, active, isQuest, isCollected, onPick
             </mesh>
           )}
 
-          {/* Generous touch target area */}
           <mesh position-y={0.2}>
             <sphereGeometry args={[0.55, 10, 8]} />
             <meshBasicMaterial transparent opacity={0} depthWrite={false} />
           </mesh>
 
-          {/* Interactive Quest Indicator Beacon */}
           {isQuest && <QuestBeacon active={active} collected={isCollected} />}
         </group>
       </group>
@@ -619,23 +572,17 @@ const Flower = memo(function Flower({ data, active, isQuest, isCollected, onPick
   );
 });
 
-
-
-/* ------------------------------------------------------------------ */
-/* 4. Smooth Multi-Frequency Korean Fluted Paper Geometry             */
-/* ------------------------------------------------------------------ */
 function makePaper(rTop, rBot, h, flutes, amp, rimWave) {
-  // High-density mesh: 256 radial segments, 64 height segments for buttery-smooth drape
+
   const g = new THREE.CylinderGeometry(rTop, rBot, h, 256, 64, true);
   const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     let x = p.getX(i);
     let y = p.getY(i);
     let z = p.getZ(i);
-    const t = clamp((y + h / 2) / h, 0, 1); // Safely clamped to prevent NaN!
+    const t = clamp((y + h / 2) / h, 0, 1); 
     const a = Math.atan2(z, x);
 
-    // Multi-frequency harmonic folding waves (flute + secondary cloth drapes)
     const wave1 = Math.sin(a * flutes);
     const wave2 = Math.sin(a * (flutes * 2.1) + 1.2) * 0.32;
     const wave3 = Math.cos(a * (flutes * 0.5) - 0.7) * 0.18;
@@ -645,7 +592,6 @@ function makePaper(rTop, rBot, h, flutes, amp, rimWave) {
     x *= f;
     z *= f;
 
-    // Multi-frequency organic scalloped rim wave (smooth cloth drape without sharp kinks)
     const rimHarmonic =
       Math.sin(a * (flutes / 2) + 1.0) * 0.72 +
       Math.sin(a * flutes + 2.3) * 0.22 +
@@ -673,7 +619,7 @@ function Paper({ startRef }) {
     const noise = getSharedTextures().noise;
     return {
       inner: new THREE.MeshPhysicalMaterial({
-        color: '#fffdf5', // Frosted ivory silk paper
+        color: '#fffdf5', 
         roughness: 0.95,
         metalness: 0.0,
         clearcoat: 0.0,
@@ -685,7 +631,7 @@ function Paper({ startRef }) {
         side: THREE.DoubleSide,
       }),
       outer: new THREE.MeshPhysicalMaterial({
-        color: '#fbcfe8', // Soft blush pink fine art paper
+        color: '#fbcfe8', 
         roughness: 0.95,
         metalness: 0.0,
         clearcoat: 0.0,
@@ -697,7 +643,7 @@ function Paper({ startRef }) {
         side: THREE.DoubleSide,
       }),
       sleeve: new THREE.MeshPhysicalMaterial({
-        color: '#be123c', // Deep matte crimson kraft cuff (100% matte, zero shine)
+        color: '#be123c', 
         roughness: 0.95,
         metalness: 0.0,
         clearcoat: 0.0,
@@ -725,25 +671,22 @@ function Paper({ startRef }) {
 
   return (
     <group ref={group} position={[0, -2.15, 0]}>
-      {/* Inner frosted ivory translucent silk paper */}
+
       <mesh geometry={geos.inner} material={mats.inner} position-y={1.50} />
-      {/* Outer soft blush pink paper */}
+
       <mesh geometry={geos.outer} material={mats.outer} position-y={1.30} />
-      {/* Sleeve cuff */}
+
       <mesh geometry={geos.sleeve} material={mats.sleeve} position-y={0.90} rotation-y={0.2} />
     </group>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Realistic 3D Silver Dollar Eucalyptus Leaves (Lá cong không xuyên hoa) */
-/* ------------------------------------------------------------------ */
 function Greenery() {
   const leafGeo = useMemo(() => makeEucalyptusLeaf(0.19, 0.29), []);
   const leafMat = useMemo(() => {
     const noise = getSharedTextures().noise;
     return new THREE.MeshPhysicalMaterial({
-      color: '#264e36', // Deep elegant botanical eucalyptus green
+      color: '#264e36', 
       side: THREE.DoubleSide,
       roughness: 0.88,
       metalness: 0.0,
@@ -769,8 +712,6 @@ function Greenery() {
       const az = (i / N) * Math.PI * 2 + (r() - 0.5) * 0.18;
       const azDeg = ((az * 180) / Math.PI) % 360;
 
-      // Special handling around orange flowers on left (az 170° - 250°):
-      // Push polar downward to 65° so leaf stays safely below the flowers and drapes down
       const isLeft = azDeg > 170 && azDeg < 250;
       const polar = (isLeft ? 65 + r() * 4 : 58 + r() * 6) * (Math.PI / 180);
 
@@ -780,16 +721,15 @@ function Greenery() {
         Math.sin(polar) * Math.sin(az)
       );
 
-      // Distance slightly below flower heads (1.66 vs flowers at 1.70)
       const dist = isLeft ? 1.66 : 1.72;
       const pos = DOME_CENTER.clone().addScaledVector(dir, dist);
       if (isLeft) {
-        pos.y -= 0.12; // Lower down away from flower petals
-        pos.z -= 0.05; // Offset back
+        pos.y -= 0.12; 
+        pos.z -= 0.05; 
       }
 
       const quat = new THREE.Quaternion().setFromUnitVectors(Y_AXIS, dir);
-      // Rotation: isLeft drapes outward/downward ([0.75, ...]) avoiding petal intersection
+
       const rot = isLeft ? [0.75, (r() - 0.5) * 0.3, -0.2] : [0.45, (r() - 0.5) * 0.4, 0];
 
       result.push({ pos, quat, rot });
@@ -808,12 +748,9 @@ function Greenery() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Natural Fluffy Baby's Breath (Thưa thoáng ở kẽ hở, không đè lên hoa) */
-/* ------------------------------------------------------------------ */
 function BabyBreath() {
   const mesh = useRef();
-  const COUNT = 65; // Giảm 40% số lượng (từ 110 xuống 65)
+  const COUNT = 65; 
   const PER = 3;
 
   useLayoutEffect(() => {
@@ -821,14 +758,13 @@ function BabyBreath() {
     const dummy = new THREE.Object3D();
     let k = 0;
 
-    // Collect flower centers for collision avoidance
     const flowerPosList = FLOWERS.map((f) => f.pos);
 
     let clusterCount = 0;
     let attempts = 0;
     while (clusterCount < COUNT && attempts < 1500) {
       attempts++;
-      // Distribution: 35% in gaps across upper dome, 65% around collar rim
+
       const isCollar = r() < 0.65;
       const polar = (isCollar ? 44 + r() * 16 : 14 + r() * 28) * (Math.PI / 180);
       const az = r() * Math.PI * 2;
@@ -839,13 +775,10 @@ function BabyBreath() {
         Math.sin(polar) * Math.sin(az)
       );
 
-      // Candidate position on dome surface
       const cand = DOME_CENTER.clone().addScaledVector(dir, DOME_R + (isCollar ? 0.03 : 0.06));
 
-      // Rule 1: Never place in the front stem opening (y < -0.15 and z > 0.75)
       if (cand.y < -0.15 && cand.z > 0.75) continue;
 
-      // Rule 2: Never place directly on top of a flower head! (distance must be >= 0.36)
       let tooClose = false;
       for (let i = 0; i < flowerPosList.length; i++) {
         if (cand.distanceTo(flowerPosList[i]) < 0.36) {
@@ -855,7 +788,6 @@ function BabyBreath() {
       }
       if (tooClose) continue;
 
-      // Accepted cluster in natural gap!
       clusterCount++;
       for (let j = 0; j < PER; j++) {
         const floretX = cand.x + (r() - 0.5) * 0.11;
@@ -875,7 +807,7 @@ function BabyBreath() {
   return (
     <instancedMesh ref={mesh} args={[undefined, undefined, COUNT * PER]} frustumCulled={false}>
       <sphereGeometry args={[1, 8, 6]} />
-      {/* Matte ivory delicate baby's breath floret */}
+
       <meshStandardMaterial
         color="#fffdfa"
         roughness={0.92}
@@ -887,9 +819,6 @@ function BabyBreath() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* 3. Handcrafted Woven Fabric Ribbon (Cánh nơ uốn lượn & đuôi vát chữ V) */
-/* ------------------------------------------------------------------ */
 function makeRibbonLoop(width = 0.14, segV = 36, segU = 6) {
   const g = new THREE.BufferGeometry();
   const verts = [];
@@ -900,7 +829,7 @@ function makeRibbonLoop(width = 0.14, segV = 36, segU = 6) {
   for (let iv = 0; iv <= segV; iv++) {
     const v = iv / segV;
     const angle = v * Math.PI * 2;
-    // Teardrop curved centerline of the bow loop
+
     const cx = Math.sin(angle * 0.5) * 0.36;
     const cy = Math.sin(angle) * 0.095 * (1 - 0.25 * Math.cos(angle * 0.5));
     const cz = (1 - Math.cos(angle * 0.5)) * 0.12;
@@ -908,7 +837,7 @@ function makeRibbonLoop(width = 0.14, segV = 36, segU = 6) {
     for (let iu = 0; iu <= segU; iu++) {
       const u = iu / segU;
       const wOffset = (u - 0.5) * width;
-      // Natural fabric crease through the middle of the ribbon loop
+
       const crease = Math.sin(u * Math.PI) * 0.018 * Math.sin(angle * 0.5);
 
       const vx = cx;
@@ -949,12 +878,11 @@ function makeRibbonTail(length = 0.85, width = 0.14, driftX = 0.1, segV = 28, se
   const indices = [];
 
   for (let iv = 0; iv <= segV; iv++) {
-    const vBase = iv / segV; // 0 (knot) to 1 (tip)
+    const vBase = iv / segV; 
     for (let iu = 0; iu <= segU; iu++) {
       const u = iu / segU;
-      const uNorm = (u - 0.5) * 2; // -1 to 1
+      const uNorm = (u - 0.5) * 2; 
 
-      // Swallowtail V-notch cutout: center cuts upward by 0.15
       const vNotch = (1 - Math.abs(uNorm)) * 0.15;
       const vEffective = clamp(vBase - vNotch * Math.pow(vBase, 2.5), 0, 1);
 
@@ -1009,8 +937,8 @@ function Ribbon() {
   const mat = useMemo(() => {
     const noise = getSharedTextures().noise;
     return new THREE.MeshPhysicalMaterial({
-      color: '#7f1d1d', // Deep warm romantic crimson wine red
-      roughness: 0.92, // Matte woven fabric
+      color: '#7f1d1d', 
+      roughness: 0.92, 
       metalness: 0.0,
       clearcoat: 0.0,
       sheen: 0.85,
@@ -1041,33 +969,25 @@ function Ribbon() {
 
   return (
     <group position={[0, -1.52, 0]}>
-      {/* 1. Wrapping belt hugging paper cone */}
+
       <mesh geometry={geos.belt} material={mat} />
 
-      {/* 2. Bow knot and draped fabric loops in front */}
       <group position={[0, 0, 0.88]}>
-        {/* Right curved loop */}
+
         <mesh geometry={geos.loopR} material={mat} rotation={[0.08, 0.25, 0.15]} />
 
-        {/* Left curved loop (mirrored on X) */}
         <mesh geometry={geos.loopL} material={mat} scale={[-1, 1, 1]} rotation={[0.08, -0.25, -0.15]} />
 
-        {/* Left cascading tail with V-notch */}
         <mesh geometry={geos.tailL} material={mat} position={[-0.04, -0.05, 0.02]} rotation={[0.12, 0.05, 0.1]} />
 
-        {/* Right cascading tail with V-notch */}
         <mesh geometry={geos.tailR} material={mat} position={[0.04, -0.05, 0.02]} rotation={[0.14, -0.05, -0.08]} />
 
-        {/* Center cinched knot */}
         <mesh geometry={geos.knot} material={mat} rotation={[0, 0, Math.PI / 2]} position={[0, 0, 0.04]} />
       </group>
     </group>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* 5. Soft Bokeh Luminous Fireflies (Đốm sáng siêu mờ lãng đãng)       */
-/* ------------------------------------------------------------------ */
 function Fireflies3D() {
   const pointsRef = useRef();
   const COUNT = 42;
@@ -1079,12 +999,12 @@ function Fireflies3D() {
     const colors = new Float32Array(COUNT * 3);
     const list = [];
 
-    const c1 = new THREE.Color('#fef3c7'); // Soft warm butter gold
-    const c2 = new THREE.Color('#fed7aa'); // Soft sunset peach
-    const c3 = new THREE.Color('#fbcfe8'); // Rose champagne
+    const c1 = new THREE.Color('#fef3c7'); 
+    const c2 = new THREE.Color('#fed7aa'); 
+    const c3 = new THREE.Color('#fbcfe8'); 
 
     for (let i = 0; i < COUNT; i++) {
-      // Float loosely in surrounding ambient space (không tụ dày trong hoa)
+
       const x = (r() - 0.5) * 8.6;
       const y = (r() - 0.5) * 6.2 + 0.3;
       const z = (r() - 0.5) * 6.0;
@@ -1137,7 +1057,7 @@ function Fireflies3D() {
         sizeAttenuation={true}
         transparent
         alphaTest={0.001}
-        opacity={0.22} // Siêu mờ (opacity: 0.15 - 0.3), không gây rối mắt
+        opacity={0.22} 
         blending={THREE.AdditiveBlending}
         depthWrite={false}
         vertexColors
@@ -1146,9 +1066,6 @@ function Fireflies3D() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Falling 3D Velvet Petals in Space (Cánh hoa rơi hồng/đỏ nhạt mờ)    */
-/* ------------------------------------------------------------------ */
 function FallingPetals({ startRef }) {
   const N = 48;
   const mesh = useRef();
@@ -1167,7 +1084,7 @@ function FallingPetals({ startRef }) {
       bumpMap: noise,
       bumpScale: 0.015,
       transparent: true,
-      opacity: 0.78, // Mềm mại, đồng bộ với bối cảnh hoàng hôn
+      opacity: 0.78, 
     });
   }, []);
   const data = useMemo(() => {
@@ -1206,10 +1123,6 @@ function FallingPetals({ startRef }) {
   return <instancedMesh ref={mesh} args={[geo, mat, N]} frustumCulled={false} />;
 }
 
-/* ------------------------------------------------------------------ */
-/* 3D Floating Love Letter Emerging From Bouquet Heart                */
-/* With Camera-Tracking Diagonal Theatrical Spotlight Beam            */
-/* ------------------------------------------------------------------ */
 function FloatingEnvelopeInner({ onOpenLetter }) {
   const groupRef = useRef();
   const flapRef = useRef();
@@ -1230,7 +1143,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
 
   const spotTarget = useMemo(() => new THREE.Object3D(), []);
 
-  // Flap triangular shape hinged at (0, 0, 0)
   const flapGeo = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(-0.64, 0.0);
@@ -1250,13 +1162,12 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
   }, []);
 
   useFrame((state, delta) => {
-    // 1. Initial emergence from bouquet
+
     animProgress.current = THREE.MathUtils.damp(animProgress.current, 1, 2.2, delta);
     const p = animProgress.current;
     const t = state.clock.elapsedTime;
     const smoothP = smooth(p);
 
-    // 2. Unfolding opening progression when clicked
     if (isOpening) {
       openProgress.current = THREE.MathUtils.damp(openProgress.current, 1, 2.8, delta);
       if (openProgress.current >= 0.94 && !openComplete.current) {
@@ -1267,27 +1178,23 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
     const op = openProgress.current;
     const smoothOp = smooth(op);
 
-    // Elevated eye-level position so envelope hovers gracefully above flower crown:
-    // reaches ~1.65 (floating right above top petals without sinking into them)
     const floatBob = Math.sin(t * 1.8) * 0.03 * (1.0 - smoothOp);
     const targetY = 0.60 + smoothP * 1.05 + floatBob;
     const letterPos = new THREE.Vector3(0, targetY, 0.65);
 
-    // Calculate line of sight from camera to letter
     const toCam = new THREE.Vector3().subVectors(state.camera.position, letterPos).normalize();
     const up = new THREE.Vector3(0, 1, 0);
     const right = new THREE.Vector3().crossVectors(up, toCam).normalize();
 
-    // When opening, envelope glides gently forward towards camera
     if (smoothOp > 0) {
       letterPos.addScaledVector(toCam, smoothOp * 0.42);
     }
 
     if (groupRef.current) {
       groupRef.current.position.copy(letterPos);
-      // Billboard towards camera so envelope and wax seal are ALWAYS 100% visible from every viewing angle
+
       groupRef.current.quaternion.copy(state.camera.quaternion);
-      // Gentle romantic tilt when floating
+
       groupRef.current.rotateX(0.10 * (1 - smoothOp) + Math.sin(t * 1.5) * 0.015 * (1 - smoothOp));
 
       const hoverScale = (hovered && !isOpening) ? 1.08 : 1.0;
@@ -1295,30 +1202,28 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
       groupRef.current.scale.set(s, s, s);
     }
 
-    // 3. Flap Opening & Wax Seal Dissolving
     if (sealRef.current) {
-      // Seal quickly shrinks & dissolves during first 22% of opening
+
       const sealScale = clamp(1.0 - op / 0.22, 0, 1);
       sealRef.current.scale.set(sealScale, sealScale, sealScale);
       sealRef.current.visible = sealScale > 0.005;
     }
 
     if (flapRef.current) {
-      // Flap unfolds backwards around hinge axis from op 0.15 to 0.65
+
       const flapNorm = clamp((op - 0.15) / 0.50, 0, 1);
       const flapAngle = smooth(flapNorm) * Math.PI * 0.96;
       flapRef.current.rotation.x = flapAngle;
     }
 
     if (sheetRef.current) {
-      // Parchment letter slides smoothly upwards out of envelope mouth from op 0.35 to 0.92
+
       const sheetNorm = clamp((op - 0.35) / 0.57, 0, 1);
       const sheetEase = smooth(sheetNorm);
       sheetRef.current.position.y = -0.06 + sheetEase * 0.62;
       sheetRef.current.position.z = 0.003 + sheetEase * 0.014;
     }
 
-    // 4. Dynamic diagonal theatrical spotlight source positioned diagonally above-right of camera
     const lightPos = letterPos.clone()
       .addScaledVector(toCam, 2.2)
       .addScaledVector(up, 3.4)
@@ -1328,16 +1233,15 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
       spotLightRef.current.position.copy(lightPos);
       spotTarget.position.copy(letterPos);
       spotLightRef.current.target = spotTarget;
-      // Gentle theatrical spotlight - warm & luminous without overexposure blowout
+
       spotLightRef.current.intensity = p * (1.35 + smoothOp * 0.45);
     }
 
     if (pointLightRef.current) {
-      // Soft local fill light on letter details
+
       pointLightRef.current.intensity = p * (0.35 + smoothOp * 0.25);
     }
 
-    // 5. Orient volumetric beam cone from lightPos down to letterPos dynamically every frame
     if (beamGroupRef.current) {
       const beamDir = new THREE.Vector3().subVectors(letterPos, lightPos).normalize();
       const beamDist = lightPos.distanceTo(letterPos);
@@ -1351,11 +1255,11 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
     }
 
     if (beamMatRef.current) {
-      // Soft morning mist falloff - subtle & elegant
+
       beamMatRef.current.opacity = (0.08 + Math.sin(t * 2.2) * 0.015) * p * (1 + smoothOp * 0.15);
     }
     if (beamCoreMatRef.current) {
-      // Delicate luminous core
+
       beamCoreMatRef.current.opacity = (0.12 + Math.sin(t * 2.6) * 0.02) * p * (1 + smoothOp * 0.15);
     }
     if (auraMatRef.current) {
@@ -1367,10 +1271,9 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
 
   return (
     <>
-      {/* Target for overhead spotlight */}
+
       <primitive object={spotTarget} />
 
-      {/* 1. Dynamic Camera-Tracking Theatrical Spotlight (Softened angle & penumbra) */}
       <spotLight
         ref={spotLightRef}
         position={[0, 5.2, 2.2]}
@@ -1383,9 +1286,8 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
         decay={1.2}
       />
 
-      {/* 2. Soft Atmospheric Volumetric Light Beam Tracking the Letter */}
       <group ref={beamGroupRef} raycast={() => null}>
-        {/* Outer Soft Light Cone with Zero-Alpha Border Falloff */}
+
         <mesh>
           <cylinderGeometry args={[0.22, 1.45, 4.0, 32, 1, true]} />
           <meshBasicMaterial
@@ -1399,7 +1301,7 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
             side={THREE.DoubleSide}
           />
         </mesh>
-        {/* Inner Luminous Beam Core */}
+
         <mesh>
           <cylinderGeometry args={[0.10, 0.78, 4.0, 32, 1, true]} />
           <meshBasicMaterial
@@ -1415,7 +1317,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
         </mesh>
       </group>
 
-      {/* 3. Golden Aura Ring at Bouquet Heart where letter emerges */}
       <mesh position={[0, 0.70, 0.55]} rotation-x={-Math.PI / 2} raycast={() => null}>
         <ringGeometry args={[0.15, 0.95, 32]} />
         <meshBasicMaterial
@@ -1429,7 +1330,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
         />
       </mesh>
 
-      {/* 4. Sparkling Fairy Dust motes dancing around the Letter */}
       <Sparkles
         count={35}
         scale={[1.8, 2.2, 1.8]}
@@ -1440,7 +1340,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
         opacity={0.85}
       />
 
-      {/* 5. The Emerged 3D Love Letter Envelope with Fluid Unfolding Animation */}
       <group
         ref={groupRef}
         position={[0, 0.60, 0.65]}
@@ -1468,7 +1367,7 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           document.body.style.cursor = 'auto';
         }}
       >
-        {/* Warm local light radiating from the letter itself */}
+
         <pointLight
           ref={pointLightRef}
           position={[0, 0, 0.28]}
@@ -1478,7 +1377,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           decay={1.8}
         />
 
-        {/* 5a. Envelope Back Plate (Warm artisanal ivory parchment) */}
         <mesh position={[0, 0, -0.006]}>
           <boxGeometry args={[1.28, 0.84, 0.008]} />
           <meshPhysicalMaterial
@@ -1493,7 +1391,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           />
         </mesh>
 
-        {/* 5b. Handwritten Love Letter Sheet that slides up when opened */}
         <mesh ref={sheetRef} position={[0, -0.06, 0.002]}>
           <planeGeometry args={[1.18, 0.78]} />
           <meshStandardMaterial
@@ -1504,7 +1401,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           />
         </mesh>
 
-        {/* 5c. Envelope Front Pocket (Covers lower half so letter emerges out of it) */}
         <mesh position={[0, -0.16, 0.008]}>
           <boxGeometry args={[1.28, 0.52, 0.008]} />
           <meshPhysicalMaterial
@@ -1519,19 +1415,16 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           />
         </mesh>
 
-        {/* Delicate golden rim on envelope pocket mouth */}
         <mesh position={[0, 0.10, 0.013]}>
           <boxGeometry args={[1.28, 0.012, 0.004]} />
           <meshStandardMaterial color="#d97706" roughness={0.4} metalness={0.5} />
         </mesh>
 
-        {/* 5d. Fine Satin Gold Ribbon across envelope */}
         <mesh position={[0, -0.16, 0.013]}>
           <boxGeometry args={[1.29, 0.07, 0.004]} />
           <meshStandardMaterial color="#d97706" roughness={0.45} metalness={0.4} />
         </mesh>
 
-        {/* 5e. Triangular Flap hinged at top edge y = 0.42 (flips backward on open) */}
         <group ref={flapRef} position={[0, 0.42, 0.008]}>
           <mesh geometry={flapGeo} position={[0, 0, 0]}>
             <meshPhysicalMaterial
@@ -1546,12 +1439,10 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
             />
           </mesh>
 
-          {/* Delicate Golden Foil Flap Border */}
           <line geometry={flapBorderGeo} position={[0, 0, 0.002]}>
             <lineBasicMaterial color="#b45309" linewidth={2} />
           </line>
 
-          {/* 5f. Royal Crimson Wax Seal attached to the flap apex */}
           <group ref={sealRef} position={[0, -0.34, 0.010]}>
             <mesh rotation-x={Math.PI / 2}>
               <cylinderGeometry args={[0.13, 0.14, 0.02, 32]} />
@@ -1570,7 +1461,6 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           </group>
         </group>
 
-        {/* 5g. Subtle, elegant reminder badge beside the letter (fades when opening) */}
         {!isOpening && (
           <Html position={[0.82, 0.06, 0.02]} center distanceFactor={6.2}>
             <div className="px-2.5 py-1 rounded-full bg-stone-900/85 backdrop-blur-md border border-amber-400/40 text-[11px] font-semibold text-amber-200 shadow-lg shadow-black/50 flex items-center gap-1.5 whitespace-nowrap select-none pointer-events-none animate-pulse">
@@ -1590,9 +1480,6 @@ function FloatingEnvelope3D({ isRevealed, onOpenLetter }) {
   return <FloatingEnvelopeInner onOpenLetter={onOpenLetter} />;
 }
 
-/* ------------------------------------------------------------------ */
-/* Swaying Rig                                                         */
-/* ------------------------------------------------------------------ */
 function Rig({ startRef, children }) {
   const g = useRef();
   useFrame((state) => {
@@ -1608,9 +1495,6 @@ function Rig({ startRef, children }) {
   return <group ref={g}>{children}</group>;
 }
 
-/* ------------------------------------------------------------------ */
-/* 3D Scene Assembly with Midnight Velvet Lighting                     */
-/* ------------------------------------------------------------------ */
 function Scene({
   replayKey,
   activeId,
@@ -1638,7 +1522,6 @@ function Scene({
       const targetDist = isPortrait ? 5.8 : 4.8;
       const targetY = isPortrait ? 1.62 : 1.52;
 
-      // Smoothly zoom in, elevate, and focus directly onto the illuminated love letter at eye level
       state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, 0, delta * 3.4);
       state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, delta * 3.4);
       state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetDist, delta * 3.4);
@@ -1652,23 +1535,18 @@ function Scene({
 
   return (
     <>
-      {/* Softened Warm Ambient & Diffuse Studio Lighting */}
+
       <ambientLight intensity={0.95} color="#fff1f2" />
       <hemisphereLight args={['#ffedd5', '#1e1b4b', 0.85]} />
 
-      {/* Gentle Warm Golden Key Light */}
       <directionalLight position={[3.5, 6, 4.5]} intensity={1.8} color="#fffbeb" />
 
-      {/* Soft Romantic Rim Light */}
       <directionalLight position={[-3, 4, -3.5]} intensity={1.3} color="#fecdd3" />
 
-      {/* Soft Ambient Under-Fill */}
       <directionalLight position={[0, -1.5, 2.5]} intensity={0.65} color="#fed7aa" />
 
-      {/* Soft Bokeh Luminous Fireflies in 3D Space (Siêu mờ 0.22) */}
       <Fireflies3D />
 
-      {/* Main Bouquet Dome (16 elegant flowers) */}
       <Rig startRef={startRef}>
         <Paper startRef={startRef} />
         {FLOWERS.map((f) => (
@@ -1686,22 +1564,17 @@ function Scene({
         <BabyBreath />
         <Ribbon />
 
-        {/* 3D Floating Love Letter emerging gracefully from bouquet heart */}
         <FloatingEnvelope3D isRevealed={isLetterRevealed} onOpenLetter={onOpenLetter} />
 
-        {/* Golden celebratory aura when secret flowers are unlocked */}
         {isLetterRevealed && (
           <Sparkles count={45} scale={[4.5, 3.5, 4.5]} size={3.5} speed={0.7} color="#fbbf24" opacity={0.65} />
         )}
       </Rig>
 
-      {/* Soft floating pastel rose petals in the air */}
       <FallingPetals startRef={startRef} />
 
-      {/* Soft, authentic contact shadow beneath bouquet base */}
       <ContactShadows position={[0, -2.18, 0]} opacity={0.55} scale={7.2} blur={3.2} far={3.8} color="#0d0918" />
 
-      {/* Responsive Camera Calibrator for Perfect Fullscreen Framing */}
       <ResponsiveCamera />
 
       <OrbitControls
@@ -1730,13 +1603,11 @@ function ResponsiveCamera() {
     const aspect = size.width / Math.max(size.height, 1);
 
     if (isPortrait) {
-      // In portrait mode (phones / narrow screens), ensure the full bouquet width & height fit without clipping
+
       const reqDist = Math.max(7.4, 4.0 / Math.max(aspect, 0.35));
       camera.position.set(0, 1.85, Math.min(reqDist, 10.5));
     } else {
-      // Landscape (desktop / laptop 16:9, 16:10, ultrawide):
-      // Bouquet is ~4.4 units high. With fov 38 and dist 7.3, visible vertical height is 5.25 units.
-      // Top rose petals and bottom paper wrapping & ribbon fit comfortably with elegant breathing room!
+
       camera.position.set(0, 1.85, 7.3);
     }
     camera.lookAt(0, 0.1, 0);

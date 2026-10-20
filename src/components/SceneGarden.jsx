@@ -5,7 +5,7 @@ import confetti from 'canvas-confetti';
 import { audioManager } from '../utils/audio';
 
 export default function SceneGarden({ onNext, recipientName }) {
-  // Progress 0 -> 100
+
   const [progress, setProgress] = useState(0);
   const [isWatering, setIsWatering] = useState(false);
   const [isAutoWatering, setIsAutoWatering] = useState(false);
@@ -17,7 +17,6 @@ export default function SceneGarden({ onNext, recipientName }) {
 
   const isBloomed = progress >= 100;
 
-  // Realtime growth increment when watering
   useEffect(() => {
     if ((isWatering || isAutoWatering) && progress < 100) {
       const now = Date.now();
@@ -55,7 +54,6 @@ export default function SceneGarden({ onNext, recipientName }) {
     };
   }, [isWatering, isAutoWatering, progress]);
 
-  // Handle Dragging
   const handleDrag = (event, info) => {
     if (isBloomed || isAutoWatering) return;
 
@@ -64,7 +62,6 @@ export default function SceneGarden({ onNext, recipientName }) {
       const px = info.point.x;
       const py = info.point.y;
 
-      // When the watering can is dragged over or above the plant
       const isOverPlant =
         px >= rect.left - 50 &&
         px <= rect.right + 70 &&
@@ -81,7 +78,6 @@ export default function SceneGarden({ onNext, recipientName }) {
     }
   };
 
-  // Click watering can or quick-water button to auto-pour
   const triggerAutoWater = () => {
     if (isBloomed || isAutoWatering) return;
     setIsAutoWatering(true);
@@ -117,12 +113,12 @@ export default function SceneGarden({ onNext, recipientName }) {
       transition={{ duration: 0.8, ease: "easeInOut" }}
       className="relative z-10 w-full max-w-xl mx-auto px-4 py-3 flex flex-col items-center"
     >
-      {/* ================= STAGE CARD CONTAINER ================= */}
+
       <div
         ref={containerRef}
         className="w-full bg-white/85 backdrop-blur-xl border border-rose-200/90 rounded-3xl p-5 sm:p-7 shadow-2xl shadow-rose-200/50 flex flex-col items-center relative overflow-hidden text-center"
       >
-        {/* Top Header */}
+
         <div className="mb-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100/90 text-rose-700 text-xs font-bold tracking-wider uppercase mb-1.5 shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-rose-500 animate-spin" style={{ animationDuration: '6s' }} />
@@ -140,7 +136,6 @@ export default function SceneGarden({ onNext, recipientName }) {
           </p>
         </div>
 
-        {/* Progress Bar (Compact & Sleek) */}
         {!isBloomed && (
           <div className="w-full max-w-xs mb-3 flex items-center gap-3">
             <div className="flex-1 h-2.5 bg-rose-100/90 rounded-full overflow-hidden p-0.5 border border-rose-200 shadow-inner">
@@ -156,9 +151,8 @@ export default function SceneGarden({ onNext, recipientName }) {
           </div>
         )}
 
-        {/* ================= THE STAGE (FLOWER + WATERING CAN) ================= */}
         <div className="relative w-full h-[340px] sm:h-[390px] flex items-center justify-center my-1">
-          {/* Soft Glow in Center */}
+
           <motion.div
             animate={{
               scale: isBloomed ? [1, 1.15, 1] : [1, 1.06, 1],
@@ -168,7 +162,6 @@ export default function SceneGarden({ onNext, recipientName }) {
             className="absolute inset-0 bg-gradient-to-t from-rose-200/40 via-pink-100/30 to-amber-100/20 rounded-full blur-2xl pointer-events-none"
           />
 
-          {/* Plant Target Zone (For Drop Detection) */}
           <div
             ref={plantTargetRef}
             className="absolute bottom-6 left-1/2 -translate-x-1/2 w-48 sm:w-56 h-48 pointer-events-none flex items-center justify-center"
@@ -182,7 +175,6 @@ export default function SceneGarden({ onNext, recipientName }) {
             )}
           </div>
 
-          {/* ---------------- SVG PLANT RENDER ---------------- */}
           <svg
             viewBox="0 0 460 480"
             className="w-full h-full overflow-visible select-none drop-shadow-lg"
@@ -229,13 +221,11 @@ export default function SceneGarden({ onNext, recipientName }) {
               </linearGradient>
             </defs>
 
-            {/* Stage Pedestal Surface Shadow */}
             <ellipse cx="230" cy="425" rx="140" ry="14" fill="#fecdd3" opacity="0.4" />
 
-            {/* PHASE 1: GROWING IN POT (0% to 99%) */}
             {!isBloomed && (
               <g>
-                {/* Pot */}
+
                 <ellipse cx="230" cy="340" rx="62" ry="13" fill="#fb923c" />
                 <path
                   d="M 172 340 L 186 420 C 190 428, 270 428, 274 420 L 288 340 Z"
@@ -245,7 +235,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                 <circle cx="230" cy="382" r="13" fill="#ffffff" opacity="0.9" />
                 <text x="230" y="387" fontSize="12" textAnchor="middle">🌸</text>
 
-                {/* Soil Ripple on Watering */}
                 {isWatering && (
                   <ellipse
                     cx="230"
@@ -259,7 +248,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   />
                 )}
 
-                {/* Seed (0% - 25%) */}
                 {progress < 25 && (
                   <g>
                     <circle cx="230" cy="326" r="14" fill="#fbbf24" opacity="0.3" filter="blur(3px)" />
@@ -268,7 +256,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   </g>
                 )}
 
-                {/* Sprout (25% - 55%) */}
                 {progress >= 25 && progress < 55 && (
                   <motion.g
                     initial={{ scale: 0.2 }}
@@ -283,7 +270,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   </motion.g>
                 )}
 
-                {/* Branches & Buds (55% - 99%) */}
                 {progress >= 55 && (
                   <motion.g
                     initial={{ scale: 0.7 }}
@@ -300,7 +286,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                     <ellipse cx="160" cy="185" rx="11" ry="16" fill="#fda4af" />
                     <ellipse cx="300" cy="175" rx="10" ry="15" fill="#fed7aa" />
 
-                    {/* Growing Center Rose Bud */}
                     <ellipse cx="230" cy="165" rx="18" ry="24" fill="#fb7185" />
                     <ellipse cx="230" cy="155" rx="13" ry="17" fill="#f43f5e" />
                     <circle cx="230" cy="145" r="8" fill="#e11d48" />
@@ -310,7 +295,6 @@ export default function SceneGarden({ onNext, recipientName }) {
               </g>
             )}
 
-            {/* PHASE 2: FULL 15-FLOWER KOREAN BOUQUET (100%) */}
             {isBloomed && (
               <motion.g
                 initial={{ scale: 0.5, opacity: 0, y: 40 }}
@@ -318,13 +302,12 @@ export default function SceneGarden({ onNext, recipientName }) {
                 transition={{ duration: 1.1, type: "spring", bounce: 0.3 }}
                 style={{ originX: "230px", originY: "380px" }}
               >
-                {/* 1. Korean Wrapping Paper */}
+
                 <path d="M 230 420 L 50 210 C 40 150, 110 100, 150 110 L 230 420 Z" fill="url(#wrapOuter)" opacity="0.85" />
                 <path d="M 230 420 L 410 210 C 420 150, 350 100, 310 110 L 230 420 Z" fill="url(#wrapOuter)" opacity="0.85" />
                 <path d="M 230 430 L 90 170 C 130 80, 330 80, 370 170 L 230 430 Z" fill="url(#wrapPaperCream)" opacity="0.9" />
                 <path d="M 230 420 L 120 130 M 230 420 L 340 130" stroke="#fecdd3" strokeWidth="2" opacity="0.6" />
 
-                {/* 2. Eucalyptus Leaves */}
                 <path d="M 210 350 Q 150 250, 100 140" fill="none" stroke="#15803d" strokeWidth="3" />
                 <ellipse cx="115" cy="170" rx="12" ry="16" fill="#86efac" opacity="0.85" transform="rotate(-30 115 170)" />
                 <ellipse cx="140" cy="210" rx="13" ry="17" fill="#4ade80" opacity="0.85" transform="rotate(-40 140 210)" />
@@ -333,7 +316,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                 <ellipse cx="345" cy="170" rx="12" ry="16" fill="#86efac" opacity="0.85" transform="rotate(30 345 170)" />
                 <ellipse cx="320" cy="210" rx="13" ry="17" fill="#4ade80" opacity="0.85" transform="rotate(40 320 210)" />
 
-                {/* 3. Baby's Breath */}
                 {[
                   { x: 120, y: 160 }, { x: 135, y: 140 }, { x: 110, y: 190 },
                   { x: 170, y: 110 }, { x: 230, y: 105 }, { x: 290, y: 110 },
@@ -347,7 +329,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   </g>
                 ))}
 
-                {/* 4. Tulips & Daisies */}
                 <g>
                   <path d="M 165 145 C 145 130, 140 90, 155 80 C 165 100, 165 130, 165 145 Z" fill="url(#tulipPeach)" />
                   <path d="M 165 145 C 185 130, 190 90, 175 80 C 165 100, 165 130, 165 145 Z" fill="#fb923c" />
@@ -365,7 +346,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   <path d="M 345 215 C 365 205, 365 170, 350 160 C 340 175, 340 200, 345 215 Z" fill="#fb923c" />
                 </g>
 
-                {/* Daisies */}
                 <g>
                   {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, idx) => (
                     <ellipse key={`daisy1-${idx}`} cx="230" cy="135" rx="5" ry="16" fill="#ffffff" transform={`rotate(${angle} 230 135)`} />
@@ -385,22 +365,20 @@ export default function SceneGarden({ onNext, recipientName }) {
                   <circle cx="310" cy="220" r="7" fill="#f59e0b" />
                 </g>
 
-                {/* 5. The 3 Grand Roses */}
-                {/* Left Blush Rose */}
                 <g>
                   {[0, 60, 120, 180, 240, 300].map((a, i) => (
                     <path key={`r1-out-${i}`} d="M 185 205 C 160 170, 170 140, 185 140 C 200 140, 210 170, 185 205 Z" fill={i % 2 === 0 ? "#f472b6" : "#fb7185"} transform={`rotate(${a} 185 205)`} />
                   ))}
                   <circle cx="185" cy="205" r="8" fill="#fbcfe8" />
                 </g>
-                {/* Right Coral Rose */}
+
                 <g>
                   {[0, 60, 120, 180, 240, 300].map((a, i) => (
                     <path key={`r2-out-${i}`} d="M 275 205 C 250 170, 260 140, 275 140 C 290 140, 300 170, 275 205 Z" fill={i % 2 === 0 ? "#fb7185" : "#fda4af"} transform={`rotate(${a} 275 205)`} />
                   ))}
                   <circle cx="275" cy="205" r="8" fill="#fed7aa" />
                 </g>
-                {/* Center Prime Rose */}
+
                 <g>
                   {[0, 45, 90, 135, 180, 225, 270, 315].map((a, i) => (
                     <path key={`r3-out-${i}`} d="M 230 230 C 200 185, 210 150, 230 150 C 250 150, 260 185, 230 230 Z" fill={i % 2 === 0 ? "url(#roseGradMain)" : "#fb7185"} transform={`rotate(${a} 230 230)`} />
@@ -412,7 +390,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   <text x="230" y="234" fontSize="10" textAnchor="middle" fill="#fff">✨</text>
                 </g>
 
-                {/* 6. Fairy Lights LED */}
                 <path
                   d="M 120 150 Q 180 110, 230 130 T 340 160 Q 300 210, 230 200 T 130 240 Q 200 290, 280 270"
                   fill="none"
@@ -438,7 +415,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   </motion.g>
                 ))}
 
-                {/* 7. Front Paper Collar */}
                 <path
                   d="M 130 330 C 180 345, 280 345, 330 330 L 255 435 C 240 445, 220 445, 205 435 Z"
                   fill="url(#wrapInner)"
@@ -450,7 +426,6 @@ export default function SceneGarden({ onNext, recipientName }) {
                   opacity="0.9"
                 />
 
-                {/* 8. Ribbon & Tag */}
                 <path d="M 220 405 Q 200 450, 185 475 Q 205 455, 215 410" fill="url(#ribbonGrad)" />
                 <path d="M 240 405 Q 260 450, 275 475 Q 255 455, 245 410" fill="url(#ribbonGrad)" />
                 <ellipse cx="205" cy="395" rx="22" ry="13" fill="url(#ribbonGrad)" transform="rotate(-20 205 395)" />
@@ -473,7 +448,6 @@ export default function SceneGarden({ onNext, recipientName }) {
             )}
           </svg>
 
-          {/* ---------------- DRAGGABLE WATERING CAN (POSITIONED NATURALLY ON RIGHT) ---------------- */}
           {!isBloomed && (
             <motion.div
               drag
@@ -503,7 +477,7 @@ export default function SceneGarden({ onNext, recipientName }) {
               whileHover={{ scale: 1.08 }}
               className="absolute bottom-12 right-6 sm:right-10 z-40 cursor-grab active:cursor-grabbing touch-none select-none filter drop-shadow-xl"
             >
-              {/* Can Container */}
+
               <div className="relative">
                 <svg width="105" height="95" viewBox="0 0 120 110">
                   <defs>
@@ -513,19 +487,18 @@ export default function SceneGarden({ onNext, recipientName }) {
                       <stop offset="100%" stopColor="#e11d48" />
                     </linearGradient>
                   </defs>
-                  {/* Handle */}
+
                   <path d="M 32 45 C 5 25, 5 75, 32 82" fill="none" stroke="#be123c" strokeWidth="7" strokeLinecap="round" />
-                  {/* Body */}
+
                   <ellipse cx="58" cy="65" rx="32" ry="26" fill="url(#canBodyGrad3)" />
-                  {/* Spout */}
+
                   <path d="M 76 60 L 108 34 L 115 42 L 83 72 Z" fill="#e11d48" />
-                  {/* Sprinkler */}
+
                   <ellipse cx="112" cy="38" rx="9" ry="13" fill="#fb7185" transform="rotate(-30 112 38)" />
-                  {/* Heart logo */}
+
                   <text x="58" y="71" fontSize="16" textAnchor="middle">💖</text>
                 </svg>
 
-                {/* Realistic Falling Water Stream towards plant */}
                 <AnimatePresence>
                   {isWatering && (
                     <motion.div
@@ -556,14 +529,12 @@ export default function SceneGarden({ onNext, recipientName }) {
                   )}
                 </AnimatePresence>
 
-                {/* Subtle Resting Pedestal Shadow */}
                 <div className="absolute -bottom-2 inset-x-2 h-2.5 bg-rose-900/10 rounded-full blur-xs pointer-events-none"></div>
               </div>
             </motion.div>
           )}
         </div>
 
-        {/* ================= BOTTOM ACTION BAR ================= */}
         {!isBloomed ? (
           <div className="w-full mt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
             <button
@@ -579,7 +550,7 @@ export default function SceneGarden({ onNext, recipientName }) {
             </span>
           </div>
         ) : (
-          /* Button To Open Love Letter When Bloomed */
+
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}

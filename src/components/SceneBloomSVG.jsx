@@ -5,7 +5,7 @@ import confetti from 'canvas-confetti';
 import { audioManager } from '../utils/audio';
 
 export default function SceneBloom({ onNext, recipientName }) {
-  // Mode: 'static' (Full bloom for inspection) or 'animated' (Live blooming progression)
+
   const [viewMode, setViewMode] = useState('static');
   const [animKey, setAnimKey] = useState(0);
   const [showLegend, setShowLegend] = useState(false);
@@ -44,10 +44,9 @@ export default function SceneBloom({ onNext, recipientName }) {
       transition={{ duration: 0.8, ease: "easeInOut" }}
       className="relative z-10 w-full max-w-2xl mx-auto px-3 sm:px-4 py-2 flex flex-col items-center select-none"
     >
-      {/* ================= MOCKUP STAGE CARD ================= */}
+
       <div className="w-full bg-white/85 backdrop-blur-xl border border-rose-200/90 rounded-3xl p-5 sm:p-7 shadow-2xl shadow-rose-200/50 flex flex-col items-center relative overflow-hidden text-center">
-        
-        {/* Mockup Inspector Control Bar */}
+
         <div className="w-full flex flex-wrap items-center justify-between gap-2 pb-3 mb-2 border-b border-rose-100">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500 text-white text-xs font-bold shadow-xs">
@@ -59,7 +58,6 @@ export default function SceneBloom({ onNext, recipientName }) {
             </span>
           </div>
 
-          {/* Mode Switcher Buttons */}
           <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-full border border-stone-200 text-xs">
             <button
               onClick={handleShowStatic}
@@ -86,7 +84,6 @@ export default function SceneBloom({ onNext, recipientName }) {
           </div>
         </div>
 
-        {/* Title */}
         <div className="mb-1">
           <h2 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-950">
             Bó Hoa Tươi Hàn Quốc Đầy Đặn 💐
@@ -96,9 +93,8 @@ export default function SceneBloom({ onNext, recipientName }) {
           </p>
         </div>
 
-        {/* ================= THE GRAND BOUQUET STAGE (20 FLOWERS) ================= */}
         <div className="relative w-[340px] h-[410px] sm:w-[450px] sm:h-[490px] flex items-center justify-center my-0.5">
-          {/* Ambient Glow */}
+
           <motion.div
             animate={{
               scale: [1, 1.12, 1],
@@ -108,14 +104,13 @@ export default function SceneBloom({ onNext, recipientName }) {
             className="absolute inset-0 bg-gradient-to-t from-rose-200/50 via-pink-100/30 to-amber-100/20 rounded-full blur-3xl pointer-events-none"
           />
 
-          {/* SVG 20-FLOWER BOUQUET */}
           <svg
             key={animKey}
             viewBox="0 0 460 520"
             className="w-full h-full overflow-visible select-none drop-shadow-2xl"
           >
             <defs>
-              {/* Korean Paper Gradients */}
+
               <linearGradient id="paperPinkFluted" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#fff1f2" />
                 <stop offset="30%" stopColor="#ffe4e6" />
@@ -128,7 +123,6 @@ export default function SceneBloom({ onNext, recipientName }) {
                 <stop offset="100%" stopColor="#fef3c7" />
               </linearGradient>
 
-              {/* Flower Gradients */}
               <linearGradient id="oharaRose" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#fbcfe8" />
                 <stop offset="40%" stopColor="#f472b6" />
@@ -158,17 +152,15 @@ export default function SceneBloom({ onNext, recipientName }) {
               </linearGradient>
             </defs>
 
-            {/* Pedestal Surface Shadow */}
             <ellipse cx="230" cy="485" rx="150" ry="15" fill="#fecdd3" opacity="0.35" />
 
-            {/* 1. KOREAN WRAPPING PAPER (LỚP GIẤY GÓI XẾP LY PHỒNG TO BỒNG BỀNH) */}
             <motion.g
               initial={isAnimated ? { scale: 0.85, opacity: 0 } : false}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
               style={{ originX: "230px", originY: "440px" }}
             >
-              {/* Back Fluted Paper Wings (Xòe rộng hai bên) */}
+
               <path
                 d="M 230 460 L 40 220 C 25 150, 110 90, 160 100 L 230 460 Z"
                 fill="url(#paperPinkFluted)"
@@ -179,43 +171,39 @@ export default function SceneBloom({ onNext, recipientName }) {
                 fill="url(#paperPinkFluted)"
                 filter="drop-shadow(0 4px 10px rgba(0,0,0,0.06))"
               />
-              {/* Center Back Cream Silk Paper */}
+
               <path
                 d="M 230 470 L 80 180 C 130 80, 330 80, 380 180 L 230 470 Z"
                 fill="url(#paperCreamSilk)"
                 opacity="0.95"
               />
-              {/* Fluted Pleat Curves */}
+
               <path d="M 230 460 Q 140 280, 100 130 M 230 460 Q 320 280, 360 130" stroke="#fecdd3" strokeWidth="2.5" opacity="0.7" fill="none" />
               <path d="M 230 460 Q 190 280, 170 110 M 230 460 Q 270 280, 290 110" stroke="#fecdd3" strokeWidth="2" opacity="0.5" fill="none" />
             </motion.g>
 
-            {/* 2. EUCALYPTUS FOLIAGE & SAGE LEAVES (LÁ BẠC KHUYNH DIỆP ĐỆM VIỀN) */}
             <motion.g
               initial={isAnimated ? { opacity: 0, scale: 0.8 } : false}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.7 }}
               style={{ originX: "230px", originY: "380px" }}
             >
-              {/* Left Eucalyptus */}
+
               <path d="M 210 390 Q 130 280, 75 160" fill="none" stroke="#15803d" strokeWidth="3" />
               <ellipse cx="95" cy="190" rx="14" ry="18" fill="#86efac" opacity="0.9" transform="rotate(-35 95 190)" />
               <ellipse cx="125" cy="235" rx="15" ry="19" fill="#4ade80" opacity="0.9" transform="rotate(-40 125 235)" />
               <ellipse cx="70" cy="155" rx="13" ry="16" fill="#86efac" transform="rotate(-20 70 155)" />
 
-              {/* Right Eucalyptus */}
               <path d="M 250 390 Q 330 280, 385 160" fill="none" stroke="#15803d" strokeWidth="3" />
               <ellipse cx="365" cy="190" rx="14" ry="18" fill="#86efac" opacity="0.9" transform="rotate(35 365 190)" />
               <ellipse cx="335" cy="235" rx="15" ry="19" fill="#4ade80" opacity="0.9" transform="rotate(40 335 235)" />
               <ellipse cx="390" cy="155" rx="13" ry="16" fill="#86efac" transform="rotate(20 390 155)" />
 
-              {/* Top Sprigs */}
               <ellipse cx="230" cy="95" rx="11" ry="17" fill="#4ade80" opacity="0.8" />
               <ellipse cx="200" cy="105" rx="10" ry="15" fill="#86efac" transform="rotate(-25 200 105)" />
               <ellipse cx="260" cy="105" rx="10" ry="15" fill="#86efac" transform="rotate(25 260 105)" />
             </motion.g>
 
-            {/* 3. BABY'S BREATH WHITE FILLERS (18 CHÙM HOA BABY TRẮNG LI TI) */}
             <motion.g
               initial={isAnimated ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
@@ -238,8 +226,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               ))}
             </motion.g>
 
-            {/* 4. THE 20 FLOWERS (ARRANGED IN A DENSE 3D DOME) */}
-            {/* --- FLOWER 1 & 2: Far Flank Coral Tulips --- */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -262,7 +248,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <path d="M 370 215 C 365 195, 365 175, 370 165 C 375 175, 375 195, 370 215 Z" fill="#f43f5e" />
             </motion.g>
 
-            {/* --- FLOWER 3 & 4: Top Slender Peach Tulips --- */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -285,8 +270,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <path d="M 275 135 C 270 115, 270 98, 275 90 C 280 98, 280 115, 275 135 Z" fill="#fb923c" />
             </motion.g>
 
-            {/* --- FLOWER 5, 6, 7, 8: 4 Lush Cream Peonies (Hoa mẫu đơn phồng tròn) --- */}
-            {/* Peony 1: Upper Left */}
             <motion.g
               initial={isAnimated ? { scale: 0, rotate: -20 } : false}
               animate={{ scale: 1, rotate: 0 }}
@@ -300,7 +283,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="140" cy="165" r="6" fill="#f43f5e" />
             </motion.g>
 
-            {/* Peony 2: Upper Right */}
             <motion.g
               initial={isAnimated ? { scale: 0, rotate: 20 } : false}
               animate={{ scale: 1, rotate: 0 }}
@@ -314,7 +296,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="320" cy="165" r="6" fill="#f43f5e" />
             </motion.g>
 
-            {/* Peony 3: Lower Left Flank */}
             <motion.g
               initial={isAnimated ? { scale: 0, rotate: -15 } : false}
               animate={{ scale: 1, rotate: 0 }}
@@ -327,7 +308,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="125" cy="280" r="9" fill="#f472b6" />
             </motion.g>
 
-            {/* Peony 4: Lower Right Flank */}
             <motion.g
               initial={isAnimated ? { scale: 0, rotate: 15 } : false}
               animate={{ scale: 1, rotate: 0 }}
@@ -340,8 +320,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="335" cy="280" r="9" fill="#f472b6" />
             </motion.g>
 
-            {/* --- FLOWER 9, 10, 11, 12, 13: 5 Chamomile / Cúc Tana Daisies (Trắng nhụy vàng) --- */}
-            {/* Daisy 1: High Center Peak */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -354,7 +332,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="230" cy="120" r="8" fill="#facc15" />
             </motion.g>
 
-            {/* Daisy 2: Mid Left */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -367,7 +344,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="145" cy="215" r="7" fill="#f59e0b" />
             </motion.g>
 
-            {/* Daisy 3: Mid Right */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -380,7 +356,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="315" cy="215" r="7" fill="#f59e0b" />
             </motion.g>
 
-            {/* Daisy 4: Low Left */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -393,7 +368,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="180" cy="290" r="6" fill="#facc15" />
             </motion.g>
 
-            {/* Daisy 5: Low Right */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -406,8 +380,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="280" cy="290" r="6" fill="#facc15" />
             </motion.g>
 
-            {/* --- FLOWER 14, 15, 16, 17: 4 Pastel Spray Roses (Hồng trà pastel) --- */}
-            {/* Spray Rose 1: Upper-left edge */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -420,7 +392,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="105" cy="160" r="5" fill="#f43f5e" />
             </motion.g>
 
-            {/* Spray Rose 2: Upper-right edge */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -433,7 +404,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="355" cy="160" r="5" fill="#f43f5e" />
             </motion.g>
 
-            {/* Spray Rose 3: Lower Center Front */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -446,7 +416,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="230" cy="275" r="7" fill="#f43f5e" />
             </motion.g>
 
-            {/* Spray Rose 4: Lower Center Base */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
@@ -459,19 +428,17 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="230" cy="320" r="6" fill="#fb7185" />
             </motion.g>
 
-            {/* --- FLOWER 18, 19, 20: 3 THE QUEEN OHARA ROSES (TÂM ĐIỂM CHỦ ĐẠO LỘNG LẪY NHẤT) --- */}
-            {/* Rose 18: Center Left Ohara Rose */}
             <motion.g
               initial={isAnimated ? { scale: 0, rotate: -20 } : false}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 1.5, duration: 0.9, type: "spring", bounce: 0.35 }}
               style={{ originX: "175px", originY: "225px" }}
             >
-              {/* Outer Velvet Petals */}
+
               {[0, 60, 120, 180, 240, 300].map((a, i) => (
                 <path key={`r18-out-${i}`} d="M 175 225 C 145 185, 155 150, 175 150 C 195 150, 205 185, 175 225 Z" fill={i % 2 === 0 ? "url(#oharaRose)" : "#fb7185"} transform={`rotate(${a} 175 225)`} />
               ))}
-              {/* Mid Spiral Petals */}
+
               {[30, 90, 150, 210, 270, 330].map((a, i) => (
                 <path key={`r18-in-${i}`} d="M 175 225 C 158 200, 165 175, 175 175 C 185 175, 192 200, 175 225 Z" fill={i % 2 === 0 ? "#e11d48" : "#f43f5e"} transform={`rotate(${a} 175 225)`} />
               ))}
@@ -479,7 +446,6 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="175" cy="225" r="5" fill="#f43f5e" />
             </motion.g>
 
-            {/* Rose 19: Center Right Ohara Rose */}
             <motion.g
               initial={isAnimated ? { scale: 0, rotate: 20 } : false}
               animate={{ scale: 1, rotate: 0 }}
@@ -496,38 +462,36 @@ export default function SceneBloom({ onNext, recipientName }) {
               <circle cx="285" cy="225" r="5" fill="#f43f5e" />
             </motion.g>
 
-            {/* Rose 20: Center-Top Grand Crown Rose (Bông hồng trung tâm lớn nhất) */}
             <motion.g
               initial={isAnimated ? { scale: 0, rotate: -10 } : false}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 1.75, duration: 1.0, type: "spring", bounce: 0.4 }}
               style={{ originX: "230px", originY: "195px" }}
             >
-              {/* Outer Layer */}
+
               {[0, 45, 90, 135, 180, 225, 270, 315].map((a, i) => (
                 <path key={`r20-out-${i}`} d="M 230 195 C 195 145, 208 105, 230 105 C 252 105, 265 145, 230 195 Z" fill={i % 2 === 0 ? "url(#oharaRose)" : "#fb7185"} transform={`rotate(${a} 230 195)`} filter="drop-shadow(0 2px 5px rgba(0,0,0,0.15))" />
               ))}
-              {/* Middle Layer */}
+
               {[22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5].map((a, i) => (
                 <path key={`r20-mid-${i}`} d="M 230 195 C 208 160, 215 130, 230 130 C 245 130, 252 160, 230 195 Z" fill={i % 2 === 0 ? "#e11d48" : "#f43f5e"} transform={`rotate(${a} 230 195)`} />
               ))}
-              {/* Inner Petal Spiral */}
+
               {[0, 60, 120, 180, 240, 300].map((a, i) => (
                 <path key={`r20-in-${i}`} d="M 230 195 C 218 178, 222 158, 230 158 C 238 158, 242 178, 230 195 Z" fill="#9f1239" transform={`rotate(${a} 230 195)`} />
               ))}
-              {/* Radiant Dew Core */}
+
               <circle cx="230" cy="195" r="11" fill="#fbbf24" />
               <circle cx="230" cy="195" r="7" fill="#f59e0b" />
               <text x="230" y="199" fontSize="9" textAnchor="middle" fill="#fff" fontWeight="bold">✨</text>
             </motion.g>
 
-            {/* 5. FRONT PLEATED COLLAR (LỚP GIẤY XẾP CHÉO PHÍA TRƯỚC) */}
             <motion.g
               initial={isAnimated ? { y: 30, opacity: 0 } : false}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.8 }}
             >
-              {/* Soft pleat collar */}
+
               <path
                 d="M 125 355 C 175 372, 285 372, 335 355 L 260 460 C 245 470, 215 470, 200 460 Z"
                 fill="url(#paperPinkFluted)"
@@ -540,25 +504,23 @@ export default function SceneBloom({ onNext, recipientName }) {
               />
             </motion.g>
 
-            {/* 6. SATIN RIBBON BOW & FLOWING TAILS (NƠ SATIN ĐỎ RƯỢU DUYÊN DÁNG) */}
             <motion.g
               initial={isAnimated ? { scale: 0 } : false}
               animate={{ scale: 1 }}
               transition={{ delay: 1.8, type: "spring", bounce: 0.4 }}
               style={{ originX: "230px", originY: "430px" }}
             >
-              {/* Ribbon Tails */}
+
               <path d="M 220 435 Q 195 480, 175 510 Q 198 485, 215 440" fill="url(#ribbonBurgundy)" />
               <path d="M 240 435 Q 265 480, 285 510 Q 262 485, 245 440" fill="url(#ribbonBurgundy)" />
-              {/* Ribbon Loops */}
+
               <ellipse cx="202" cy="425" rx="25" ry="15" fill="url(#ribbonBurgundy)" transform="rotate(-20 202 425)" />
               <ellipse cx="258" cy="425" rx="25" ry="15" fill="url(#ribbonBurgundy)" transform="rotate(20 258 425)" />
-              {/* Knot Center */}
+
               <circle cx="230" cy="427" r="10" fill="#4c0519" />
               <circle cx="230" cy="427" r="7" fill="#be123c" />
             </motion.g>
 
-            {/* Floating Soft Emojis */}
             <motion.g
               animate={{ y: [-4, -14, -4], opacity: [0.5, 1, 0.5] }}
               transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
@@ -570,7 +532,6 @@ export default function SceneBloom({ onNext, recipientName }) {
           </svg>
         </div>
 
-        {/* Flower Composition Legend (Có thể bấm xem để duyệt từng loài hoa) */}
         <div className="w-full mt-1 flex flex-col items-center">
           <button
             onClick={() => setShowLegend(!showLegend)}
@@ -613,7 +574,6 @@ export default function SceneBloom({ onNext, recipientName }) {
             </motion.div>
           )}
 
-          {/* ================= APPROVE & PROCEED BUTTON ================= */}
           <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-3 mt-1">
             <motion.button
               onClick={() => {

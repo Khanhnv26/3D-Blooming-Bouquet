@@ -18,7 +18,6 @@ export default function BackgroundCanvas() {
     };
     window.addEventListener('resize', handleResize);
 
-    // Particles: Petals & Glowing Fireflies
     const petalCount = Math.min(30, Math.floor(width / 35));
     const fireflyCount = Math.min(45, Math.floor(width / 25));
 
@@ -45,7 +44,6 @@ export default function BackgroundCanvas() {
       speedY: (Math.random() - 0.5) * 0.6
     }));
 
-    // Interactive burst particles
     const bursts = [];
 
     const handlePointerDown = (e) => {
@@ -72,7 +70,6 @@ export default function BackgroundCanvas() {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw glowing fireflies
       fireflies.forEach((f) => {
         f.x += f.speedX;
         f.y += f.speedY;
@@ -96,7 +93,6 @@ export default function BackgroundCanvas() {
         ctx.restore();
       });
 
-      // 2. Draw falling flower petals
       petals.forEach((p) => {
         p.x += p.speedX;
         p.y += p.speedY;
@@ -114,7 +110,6 @@ export default function BackgroundCanvas() {
         ctx.rotate((p.rotation * Math.PI) / 180);
         ctx.globalAlpha = p.opacity;
 
-        // Draw curved rose petal
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.bezierCurveTo(-p.size, -p.size * 0.6, -p.size * 0.8, p.size, 0, p.size * 1.4);
@@ -126,7 +121,6 @@ export default function BackgroundCanvas() {
         ctx.restore();
       });
 
-      // 3. Draw click bursts
       for (let i = bursts.length - 1; i >= 0; i--) {
         const b = bursts[i];
         b.x += b.vx;

@@ -24,7 +24,6 @@ export default function SceneSeed({ onNext, recipientName }) {
     const nextCount = clickCount + 1;
     setClickCount(nextCount);
 
-    // Mini confetti on each tap
     confetti({
       particleCount: 18,
       spread: 50,
@@ -60,7 +59,7 @@ export default function SceneSeed({ onNext, recipientName }) {
       transition={{ duration: 0.8, ease: "easeInOut" }}
       className="relative z-10 flex flex-col items-center justify-center min-h-[90vh] px-4 py-8 text-center max-w-xl mx-auto"
     >
-      {/* Top greeting badge */}
+
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -73,7 +72,6 @@ export default function SceneSeed({ onNext, recipientName }) {
         <span className="font-semibold text-rose-800">{recipientName}</span>
       </motion.div>
 
-      {/* Romantic Headline */}
       <motion.h1
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -92,9 +90,8 @@ export default function SceneSeed({ onNext, recipientName }) {
         Hôm nay là 20/10, anh có một điều bất ngờ đặc biệt đã ấp ủ từ lâu. Hãy cùng anh gieo mầm và truyền yêu thương để xem điều kỳ diệu gì sẽ xảy ra nhé!
       </motion.p>
 
-      {/* Central Interactive Magical Seed Container */}
       <div className="relative my-6 flex flex-col items-center justify-center">
-        {/* Pulsing Aura Rings */}
+
         <motion.div
           animate={{
             scale: [1, 1.25, 1],
@@ -113,17 +110,15 @@ export default function SceneSeed({ onNext, recipientName }) {
           className="absolute w-40 h-40 rounded-full bg-rose-300/30 blur-md pointer-events-none"
         />
 
-        {/* The Magical Pot & Seed */}
         <motion.div
           whileHover={{ scale: 1.05 }}
           className="relative w-44 h-44 rounded-3xl bg-gradient-to-b from-white/90 to-rose-50/90 backdrop-blur-md border border-rose-200/80 shadow-2xl shadow-rose-200/60 flex flex-col items-center justify-center cursor-pointer overflow-hidden p-4 group"
           onClick={handleInteract}
         >
-          {/* Subtle sparkles in pot */}
+
           <div className="absolute top-3 left-3 text-amber-400 text-xs animate-pulse">✨</div>
           <div className="absolute bottom-3 right-3 text-rose-400 text-xs animate-pulse" style={{ animationDelay: '1s' }}>💖</div>
 
-          {/* Seed / Sprout representation that grows with clicks */}
           <div className="relative flex flex-col items-center">
             <motion.div
               animate={{
@@ -144,7 +139,6 @@ export default function SceneSeed({ onNext, recipientName }) {
               {clickCount >= 3 && '🌸'}
             </motion.div>
 
-            {/* Glowing ring under the seed */}
             <motion.div
               animate={{ width: ['40px', '55px', '40px'] }}
               transition={{ repeat: Infinity, duration: 2 }}
@@ -152,12 +146,10 @@ export default function SceneSeed({ onNext, recipientName }) {
             />
           </div>
 
-          {/* Pot soil base */}
           <div className="absolute bottom-0 inset-x-0 h-4 bg-gradient-to-t from-amber-900/20 to-transparent"></div>
         </motion.div>
       </div>
 
-      {/* Progress Dots */}
       <div className="flex items-center gap-2 mb-6 mt-4">
         {[0, 1, 2].map((idx) => (
           <motion.div
@@ -173,7 +165,6 @@ export default function SceneSeed({ onNext, recipientName }) {
         ))}
       </div>
 
-      {/* Action Button */}
       <motion.button
         onClick={handleInteract}
         whileHover={{ scale: 1.04 }}

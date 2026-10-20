@@ -47,7 +47,6 @@ export default function SceneBloom({ onNext, recipientName }) {
   const clearTimer = useRef(null);
   const idleTimer = useRef(null);
 
-  // Whisper mapping for the 5 quest flowers
   const whisperMap = useMemo(() => {
     const map = {};
     if (CONFIG.secretWhispers) {
@@ -58,7 +57,6 @@ export default function SceneBloom({ onNext, recipientName }) {
     return map;
   }, []);
 
-  // Initial welcome bloom audio
   useEffect(() => {
     if (!webgl) return undefined;
     audioManager.playChime();
@@ -80,7 +78,6 @@ export default function SceneBloom({ onNext, recipientName }) {
     };
   }, []);
 
-  // Auto hide UI while dragging/rotating bouquet
   const handleInteractStart = useCallback(() => {
     setIsInteracting(true);
     clearTimeout(idleTimer.current);
@@ -93,12 +90,10 @@ export default function SceneBloom({ onNext, recipientName }) {
     }, 2200);
   }, []);
 
-  // Handle Flower Picking & Quest Progression
   const handlePick = useCallback(
     (kind, id) => {
       setActiveId(id);
 
-      // Check if this is a quest flower or already tapped
       const isQuest = QUEST_IDS.includes(id);
       const isNewQuest = isQuest && !collectedIds.includes(id);
 
@@ -121,7 +116,6 @@ export default function SceneBloom({ onNext, recipientName }) {
         setCollectedIds(nextCollected);
         audioManager.playCollectSound();
 
-        // Mini sparkle burst for finding a secret flower
         confetti({
           particleCount: 30,
           spread: 60,
@@ -132,7 +126,6 @@ export default function SceneBloom({ onNext, recipientName }) {
         audioManager.playChime();
       }
 
-      // Check if all 5 quest flowers found
       if (nextCollected.length >= QUEST_IDS.length && !isLetterRevealed) {
         setIsLetterRevealed(true);
         setActiveId(null);
@@ -149,7 +142,6 @@ export default function SceneBloom({ onNext, recipientName }) {
         }, 500);
       }
 
-      // Restore UI quickly
       handleInteractStart();
       handleInteractEnd();
 
@@ -192,7 +184,7 @@ export default function SceneBloom({ onNext, recipientName }) {
       onPointerUp={handleInteractEnd}
       className="relative w-full h-full flex flex-col items-center justify-between overflow-hidden select-none"
     >
-      {/* ================= 1. FULLSCREEN 3D STUDIO STAGE ================= */}
+
       <div className="absolute inset-0 z-0 w-full h-full">
         <Canvas3DBoundary fallback={fallback}>
           <Suspense
@@ -223,7 +215,6 @@ export default function SceneBloom({ onNext, recipientName }) {
         </Canvas3DBoundary>
       </div>
 
-      {/* ================= 2. MINIMAL FLOATING QUEST PROGRESS HUD ================= */}
       <AnimatePresence>
         {!isInteracting && !isLetterRevealed && (
           <motion.div
@@ -233,14 +224,13 @@ export default function SceneBloom({ onNext, recipientName }) {
             transition={{ duration: 0.35, ease: 'easeInOut' }}
             className="relative z-10 pt-3 px-4 text-center pointer-events-auto"
           >
-            {/* Quest HUD: 5 Secret Flowers to Unlock Letter */}
+
             <div className="inline-flex items-center gap-2 px-4 py-1.8 rounded-full bg-stone-900/85 backdrop-blur-md border border-rose-500/35 shadow-xl">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400 animate-pulse" />
               <span className="text-xs font-semibold text-rose-200">
                 Khám phá 5 đóa hoa phát sáng ({collectedCount}/5):
               </span>
 
-              {/* 5 Heart Icons */}
               <div className="flex items-center gap-1">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <span
@@ -258,7 +248,6 @@ export default function SceneBloom({ onNext, recipientName }) {
         )}
       </AnimatePresence>
 
-      {/* ================= 3. FLOATING LOVE MESSAGE TOAST ================= */}
       <AnimatePresence>
         {!isLetterRevealed && message && (
           <motion.div
@@ -280,7 +269,6 @@ export default function SceneBloom({ onNext, recipientName }) {
         )}
       </AnimatePresence>
 
-      {/* ================= 4. FLOATING BOTTOM ACTION BAR ================= */}
       <AnimatePresence>
         {!isInteracting && !isLetterRevealed && (
           <motion.div

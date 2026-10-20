@@ -10,27 +10,28 @@ export default function MusicPlayer({ audioUrl, songTitle }) {
   useEffect(() => {
     audioManager.init(audioUrl);
 
-    // Prompt user to play music on their very first click anywhere on page
+    const unsubscribe = audioManager.subscribe((playing) => {
+      setIsPlaying(playing);
+    });
+
     const handleFirstClick = () => {
-      if (!hasInteracted) {
-        setHasInteracted(true);
+      if (!audioManager.isPlaying) {
         audioManager.play();
-        setIsPlaying(true);
-        window.removeEventListener('click', handleFirstClick);
       }
+      window.removeEventListener('click', handleFirstClick);
     };
 
     window.addEventListener('click', handleFirstClick);
     return () => {
+      unsubscribe();
       window.removeEventListener('click', handleFirstClick);
     };
-  }, [audioUrl, hasInteracted]);
+  }, [audioUrl]);
 
   const toggleMusic = (e) => {
     e.stopPropagation();
     const playing = audioManager.toggle();
     setIsPlaying(playing);
-    setHasInteracted(true);
   };
 
   return (
@@ -42,7 +43,7 @@ export default function MusicPlayer({ audioUrl, songTitle }) {
         className="group relative flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-stone-900/85 backdrop-blur-md border border-rose-500/35 shadow-xl text-rose-200 transition-all hover:bg-stone-800 hover:border-rose-400 cursor-pointer"
         title={isPlaying ? "Tắt nhạc" : "Bật nhạc lofi tình cảm"}
       >
-        {/* Spinning Vinyl Disc */}
+
         <div className="relative w-7 h-7 flex items-center justify-center">
           <motion.div
             animate={{ rotate: isPlaying ? 360 : 0 }}
@@ -65,7 +66,6 @@ export default function MusicPlayer({ audioUrl, songTitle }) {
           </span>
         </div>
 
-        {/* Dynamic Equalizer Bar or Title */}
         <div className="hidden sm:flex flex-col text-left">
           <span className="text-xs font-semibold tracking-wide text-rose-100 line-clamp-1 max-w-[130px]">
             {songTitle || "Giai điệu 20.10"}
@@ -82,7 +82,6 @@ export default function MusicPlayer({ audioUrl, songTitle }) {
           </span>
         </div>
 
-        {/* Audio Soundwave Bars */}
         <div className="flex items-end gap-0.5 h-4 w-3.5 px-0.5">
           <motion.span
             animate={{ height: isPlaying ? ['30%', '100%', '40%'] : '25%' }}

@@ -4,9 +4,6 @@ import { Heart, RotateCcw, ArrowLeft, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { audioManager } from '../utils/audio';
 
-/* ------------------------------------------------------------------ */
-/* 1. Realistic Drifting Rose Petals & Golden Bokeh Layer             */
-/* ------------------------------------------------------------------ */
 function FloatingRosePetals() {
   const petals = useMemo(
     () =>
@@ -25,7 +22,7 @@ function FloatingRosePetals() {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Golden bokeh ambient orbs */}
+
       <div className="absolute top-1/4 left-1/6 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute top-2/3 right-1/6 w-80 h-80 rounded-full bg-rose-600/10 blur-3xl pointer-events-none animate-pulse" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-amber-400/8 blur-3xl pointer-events-none" />
@@ -69,7 +66,6 @@ function FloatingRosePetals() {
         </motion.div>
       ))}
 
-      {/* Shared Gradient Definition */}
       <svg className="absolute w-0 h-0">
         <defs>
           <linearGradient id="rosePetalGrad" x1="0" y1="0" x2="1" y2="1">
@@ -83,9 +79,6 @@ function FloatingRosePetals() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* 2. Floating Fireflies & Golden Embers Layer                        */
-/* ------------------------------------------------------------------ */
 function AmbientFireflies() {
   const flies = useMemo(
     () =>
@@ -130,9 +123,6 @@ function AmbientFireflies() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* 3. Romantic Flickering Taper Candle with Dynamic Embers & Flares   */
-/* ------------------------------------------------------------------ */
 function RomanticCandle() {
   const handleCandleClick = () => {
     audioManager.playChime();
@@ -150,7 +140,7 @@ function RomanticCandle() {
       title="Chạm vào ngọn nến để bùng tia sáng ấm áp ✨"
       className="relative flex flex-col items-center cursor-pointer hover:scale-105 active:scale-95 transition-transform group"
     >
-      {/* Ambient Candlelight Radial Halo */}
+
       <motion.div
         animate={{
           scale: [1, 1.15, 0.95, 1.1, 1],
@@ -160,7 +150,6 @@ function RomanticCandle() {
         className="absolute -top-14 w-56 h-56 rounded-full bg-amber-400/25 blur-2xl pointer-events-none"
       />
 
-      {/* Rising Golden Embers / Sparkles from Flame */}
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
@@ -181,7 +170,6 @@ function RomanticCandle() {
         />
       ))}
 
-      {/* Flame */}
       <div className="relative z-10 flex flex-col items-center">
         <motion.div
           animate={{
@@ -192,30 +180,25 @@ function RomanticCandle() {
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
           className="w-4 h-9 bg-gradient-to-t from-amber-500 via-amber-300 to-amber-100 rounded-[50%_50%_35%_35%] shadow-[0_0_24px_rgba(251,191,36,0.9)] flex items-center justify-center group-hover:scale-125 transition-transform"
         >
-          {/* Inner blue-white flame core */}
+
           <div className="w-1.5 h-3.5 bg-white/95 rounded-[50%_50%_30%_30%] mt-3.5 shadow-inner" />
         </motion.div>
-        {/* Wick */}
+
         <div className="w-0.5 h-2.5 bg-stone-800 -mt-0.5" />
       </div>
 
-      {/* Candle Pillar */}
       <div className="w-10 h-32 bg-gradient-to-r from-[#fefbf3] via-[#fef3c7] to-[#e7e5e4] rounded-t-sm shadow-lg relative overflow-hidden border-t border-amber-200/50">
-        {/* Soft melted wax drips */}
+
         <div className="absolute top-0 right-2 w-2 h-7 bg-[#fefbf3] rounded-b-full shadow-xs" />
         <div className="absolute top-0 left-2.5 w-1.5 h-4 bg-[#fef9c3] rounded-b-full shadow-xs" />
       </div>
 
-      {/* Antique Brass Candleholder */}
       <div className="w-14 h-3.5 bg-gradient-to-r from-amber-800 via-amber-500 to-amber-900 rounded-sm shadow-md" />
       <div className="w-22 h-3 bg-gradient-to-r from-amber-900 via-amber-600 to-amber-950 rounded-full shadow-xl -mt-0.5" />
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* 4. Vintage Botanical Dried Rose & Eucalyptus Sprig (Swaying)       */
-/* ------------------------------------------------------------------ */
 function DriedBotanicalSprig() {
   const handleSprigClick = () => {
     audioManager.playChime();
@@ -239,13 +222,13 @@ function DriedBotanicalSprig() {
       className="relative flex flex-col items-center cursor-pointer hover:scale-110 active:scale-95 transition-transform group"
     >
       <svg className="w-32 h-44 drop-shadow-md" viewBox="0 0 100 150" fill="none">
-        {/* Central stem */}
+
         <path d="M50 145 C45 100 60 50 48 10" stroke="#78716c" strokeWidth="2.2" strokeLinecap="round" />
-        {/* Eucalyptus leaves */}
+
         <path d="M48 110 C28 100 24 84 34 78 C44 80 47 98 48 110" fill="#a8a29e" fillOpacity="0.5" stroke="#78716c" strokeWidth="1" />
         <path d="M52 90 C72 82 80 68 70 60 C60 62 54 78 52 90" fill="#a8a29e" fillOpacity="0.5" stroke="#78716c" strokeWidth="1" />
         <path d="M47 65 C30 58 26 42 36 36 C46 38 48 52 47 65" fill="#a8a29e" fillOpacity="0.5" stroke="#78716c" strokeWidth="1" />
-        {/* Dried Rosebud Blossom */}
+
         <g transform="translate(48, 12)">
           <ellipse cx="0" cy="0" rx="9" ry="12" fill="#9f1239" fillOpacity="0.85" />
           <path d="M-6 -4 C-2 -10 2 -10 6 -4 C4 4 -4 4 -6 -4" fill="#e11d48" fillOpacity="0.9" />
@@ -256,9 +239,6 @@ function DriedBotanicalSprig() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* 5. Antique Gold & Rosewood Fountain Pen (Dancing / Writing)        */
-/* ------------------------------------------------------------------ */
 function VintageFountainPen({ isTyping }) {
   const handlePenClick = () => {
     audioManager.playChime();
@@ -293,14 +273,13 @@ function VintageFountainPen({ isTyping }) {
       title="Bút máy mạ vàng đang nắn nót từng dòng thư 🖋️"
       className="relative flex flex-col items-center drop-shadow-xl cursor-pointer hover:scale-110 active:scale-95 transition-transform group"
     >
-      {/* Pen Barrel */}
+
       <div className="w-3.5 h-36 bg-gradient-to-r from-rose-950 via-rose-900 to-amber-950 rounded-t-full shadow-lg relative">
-        {/* Gold Trim Rings */}
+
         <div className="absolute bottom-6 inset-x-0 h-1.5 bg-gradient-to-r from-amber-300 via-amber-100 to-amber-400 shadow-xs" />
         <div className="absolute bottom-4 inset-x-0 h-1 bg-amber-400" />
       </div>
 
-      {/* Two-tone Gold Fountain Nib */}
       <div className="relative">
         <svg className="w-5 h-8 text-amber-300 -mt-0.5 drop-shadow-md" viewBox="0 0 24 36" fill="currentColor">
           <path d="M12 36 L4 14 C4 8 7 0 12 0 C17 0 20 8 20 14 Z" fill="url(#fountainNibGrad)" />
@@ -315,7 +294,6 @@ function VintageFountainPen({ isTyping }) {
           </defs>
         </svg>
 
-        {/* Dancing Golden Ink Sparkle at Nib while typing */}
         {isTyping && (
           <motion.div
             animate={{ scale: [0.6, 1.4, 0.6], opacity: [0.5, 1, 0.5] }}
@@ -325,15 +303,11 @@ function VintageFountainPen({ isTyping }) {
         )}
       </div>
 
-      {/* Ink Shadow on Table */}
       <div className="w-14 h-1.5 bg-black/40 blur-xs rounded-full mt-1" />
     </motion.div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* 6. Keepsake Wax Seal & Opened Envelope Decor (Interactive)         */
-/* ------------------------------------------------------------------ */
 function KeepsakeEnvelopeDecor() {
   const handleEnvelopeClick = () => {
     audioManager.playChime();
@@ -354,9 +328,9 @@ function KeepsakeEnvelopeDecor() {
       className="flex flex-col items-center gap-2 -rotate-6 cursor-pointer drop-shadow-xl select-none"
     >
       <div className="w-20 h-14 rounded-lg bg-stone-900/85 border border-amber-400/40 p-2 shadow-2xl backdrop-blur-md flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Gold Satin Ribbon Drape */}
+
         <div className="absolute top-2.5 inset-x-0 h-2 bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600 opacity-90 shadow-xs" />
-        {/* Heart Wax Seal */}
+
         <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-rose-900 to-red-600 border border-amber-300 flex items-center justify-center shadow-md relative z-10">
           <Heart className="w-3.5 h-3.5 text-amber-200 fill-amber-200" />
         </div>
@@ -365,9 +339,6 @@ function KeepsakeEnvelopeDecor() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* MAIN COMPONENT: SceneLetter                                        */
-/* ------------------------------------------------------------------ */
 export default function SceneLetter({ config, onReplay }) {
   const [displayedParagraphs, setDisplayedParagraphs] = useState([]);
   const [currentParaIndex, setCurrentParaIndex] = useState(0);
@@ -376,13 +347,11 @@ export default function SceneLetter({ config, onReplay }) {
   const [floatingHearts, setFloatingHearts] = useState([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Ensure all strings are strictly NFC normalized so Vietnamese diacritics are flawless
   const paragraphs = useMemo(
     () => (config?.letter?.paragraphs || []).map((p) => p.normalize('NFC')),
     [config?.letter?.paragraphs]
   );
 
-  // Initial letter open celebration
   useEffect(() => {
     audioManager.playMagicFanfare();
     confetti({
@@ -393,11 +362,10 @@ export default function SceneLetter({ config, onReplay }) {
     });
   }, []);
 
-  // 3D Parallax Tilt Handler
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+    const x = (e.clientX - rect.left) / rect.width - 0.5; 
+    const y = (e.clientY - rect.top) / rect.height - 0.5; 
     setMousePos({ x, y });
   };
 
@@ -405,7 +373,6 @@ export default function SceneLetter({ config, onReplay }) {
     setMousePos({ x: 0, y: 0 });
   };
 
-  // Typewriter effect for paragraphs
   useEffect(() => {
     if (isTypingComplete) return;
 
@@ -431,14 +398,12 @@ export default function SceneLetter({ config, onReplay }) {
     }
   }, [currentParaIndex, charIndex, isTypingComplete, paragraphs]);
 
-  // Fast forward typewriter
   const handleSkipTypewriter = () => {
     setDisplayedParagraphs(paragraphs);
     setIsTypingComplete(true);
     audioManager.playChime();
   };
 
-  // Re-read letter animation
   const handleReRead = () => {
     setDisplayedParagraphs([]);
     setCurrentParaIndex(0);
@@ -447,7 +412,6 @@ export default function SceneLetter({ config, onReplay }) {
     audioManager.playChime();
   };
 
-  // Trigger heart burst
   const handleLoveBurst = () => {
     audioManager.playChime();
     confetti({
@@ -457,7 +421,6 @@ export default function SceneLetter({ config, onReplay }) {
       colors: ['#f43f5e', '#fb7185', '#fbbf24', '#fda4af'],
     });
 
-    // Add floating emoji heart
     const id = Date.now() + Math.random();
     setFloatingHearts((prev) => [...prev.slice(-6), { id, x: (Math.random() - 0.5) * 180 }]);
     setTimeout(() => {
@@ -471,13 +434,11 @@ export default function SceneLetter({ config, onReplay }) {
       onMouseLeave={handleMouseLeave}
       className="relative z-10 w-full min-h-screen py-10 px-4 sm:px-6 flex flex-col items-center justify-start overflow-x-hidden"
     >
-      {/* 1. Gentle Drifting Rose Petals & Golden Bokeh Layer */}
+
       <FloatingRosePetals />
 
-      {/* 2. Floating Fireflies & Golden Embers */}
       <AmbientFireflies />
 
-      {/* 3. Top Floating Navigation Bar */}
       <div className="relative z-20 w-full max-w-4xl flex items-center justify-between mb-8">
         <button
           onClick={onReplay}
@@ -497,19 +458,13 @@ export default function SceneLetter({ config, onReplay }) {
         </button>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 4. DESKTOP STAGE: ROMANTIC WRITING DESK WITH FLANKING ATMOSPHERE ELEMENTS */}
-      {/* ========================================================================= */}
       <div className="relative z-20 w-full max-w-6xl flex items-start justify-center gap-6 lg:gap-10">
-        {/* Left Flank: Candlelight & Dried Rose Sprig (Shown on desktop/tablet) */}
+
         <aside className="hidden lg:flex flex-col items-center gap-12 select-none sticky top-28 pt-8">
           <RomanticCandle />
           <DriedBotanicalSprig />
         </aside>
 
-        {/* ========================================================================= */}
-        {/* THE MASTERPIECE LUXURY COTTON PARCHMENT LOVE LETTER WITH 3D PARALLAX TILT */}
-        {/* ========================================================================= */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 25 }}
           animate={{
@@ -529,9 +484,9 @@ export default function SceneLetter({ config, onReplay }) {
           style={{ transformPerspective: 1200, transformStyle: 'preserve-3d' }}
           className="relative z-20 w-full max-w-2xl sm:max-w-3xl flex flex-col items-center"
         >
-          {/* Luxury Double-Bezel Cotton Parchment Container */}
+
           <div className="relative w-full bg-[#fdfbf7] rounded-3xl p-8 sm:p-14 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.6),0_0_60px_rgba(251,191,36,0.1)] border-2 border-amber-300/60 overflow-hidden text-left">
-            {/* Dynamic Metallic Light Sheen sweeping with mouse angle */}
+
             <div
               className="absolute inset-0 pointer-events-none rounded-3xl opacity-30 transition-opacity duration-300"
               style={{
@@ -539,13 +494,10 @@ export default function SceneLetter({ config, onReplay }) {
               }}
             />
 
-            {/* Candlelight Warmth Aura on Paper Left Flank */}
             <div className="absolute -left-12 top-1/4 w-36 h-72 bg-gradient-to-r from-amber-400/18 via-amber-300/8 to-transparent rounded-full blur-2xl pointer-events-none animate-pulse" />
 
-            {/* Fine Inner Filigree Border Frame */}
             <div className="absolute inset-3 sm:inset-4 border border-amber-200/50 rounded-2xl pointer-events-none"></div>
 
-            {/* Elegant Corner Engravings (SVG Botanical Flourishes) */}
             <svg
               className="absolute top-4 left-4 w-8 h-8 text-amber-400/60 pointer-events-none"
               viewBox="0 0 40 40"
@@ -591,7 +543,6 @@ export default function SceneLetter({ config, onReplay }) {
               <circle cx="12" cy="12" r="2.5" fill="currentColor" opacity="0.6" />
             </svg>
 
-            {/* Salutation & Vintage Date */}
             <div className="relative border-b border-rose-200/60 pb-5 mb-8 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1.5">
               <h2 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-950 tracking-tight">
                 {config?.letter?.salutation || 'Gửi công chúa nhỏ của anh,'}
@@ -601,7 +552,6 @@ export default function SceneLetter({ config, onReplay }) {
               </span>
             </div>
 
-            {/* Body Paragraphs with Organic Flowing Typewriter Motion */}
             <div className="space-y-6 text-stone-800 text-[17px] sm:text-lg leading-[2.05] font-serif">
               {displayedParagraphs.map((para, idx) => (
                 <motion.p
@@ -623,9 +573,8 @@ export default function SceneLetter({ config, onReplay }) {
               )}
             </div>
 
-            {/* Closing & Handwritten Signature with Royal Crimson Wax Seal */}
             <div className="mt-12 pt-7 border-t border-rose-200/60 flex flex-col sm:flex-row items-center justify-between gap-6">
-              {/* Embossed Royal Wax Seal Watermark on Paper */}
+
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-900 via-rose-800 to-red-700 flex items-center justify-center shadow-lg border-2 border-amber-300/80">
                   <Heart className="w-7 h-7 text-amber-200 fill-amber-200" />
@@ -640,7 +589,6 @@ export default function SceneLetter({ config, onReplay }) {
                 </div>
               </div>
 
-              {/* Handwritten Signature */}
               <div className="text-center sm:text-right">
                 <span className="text-stone-500 text-sm font-serif italic block mb-1">
                   {config?.letter?.closing || 'Mãi yêu em,'}
@@ -652,7 +600,6 @@ export default function SceneLetter({ config, onReplay }) {
             </div>
           </div>
 
-          {/* Romantic Bottom Controls */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 w-full">
             <button
               onClick={handleReRead}
@@ -672,14 +619,12 @@ export default function SceneLetter({ config, onReplay }) {
           </div>
         </motion.div>
 
-        {/* Right Flank: Vintage Fountain Pen & Keepsake Envelope (Shown on desktop/tablet) */}
         <aside className="hidden lg:flex flex-col items-center gap-14 select-none sticky top-28 pt-8">
           <VintageFountainPen isTyping={!isTypingComplete} />
           <KeepsakeEnvelopeDecor />
         </aside>
       </div>
 
-      {/* Floating Interactive Hearts Overlay */}
       <AnimatePresence>
         {floatingHearts.map((heart) => (
           <motion.div
