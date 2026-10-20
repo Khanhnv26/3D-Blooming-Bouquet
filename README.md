@@ -21,9 +21,11 @@ Xây dựng bằng **React · Three.js · Vite · Tailwind CSS**
 ![WebGL và SVG](https://img.shields.io/badge/Hiển_thị-WebGL_%2B_SVG-8B5CF6?style=flat-square)
 ![Nhạc nền](https://img.shields.io/badge/Âm_thanh-Nhạc_nền_%26_tương_tác-F59E0B?style=flat-square)
 
-[✨ Tính năng](#-tính-năng) · [🚀 Bắt đầu](#-cài-đặt-và-chạy) · [✏️ Cấu hình](#️-cấu-hình-nội-dung) · [📦 Triển khai](#-triển-khai)
+[🌐 Trải nghiệm trực tiếp](https://3d-blooming-bouquet-v1.vercel.app/) · [✨ Tính năng](#-tính-năng) · [🚀 Bắt đầu](#-cài-đặt-và-chạy) · [✏️ Cấu hình](#️-cấu-hình-nội-dung) · [📦 Triển khai](#-triển-khai)
 
 🌷 &nbsp; 🌹 &nbsp; 🌸 &nbsp; 🌼 &nbsp; 💐
+
+> 🔗 **Live Demo:** [https://3d-blooming-bouquet-v1.vercel.app/](https://3d-blooming-bouquet-v1.vercel.app/)
 
 </div>
 
@@ -142,6 +144,7 @@ vite.config.js            # Cấu hình Vite, React và Tailwind CSS
 
 ## 📦 Triển khai
 
-Chạy `npm run build`, sau đó đưa nội dung thư mục `dist/` lên dịch vụ hosting tĩnh. Ứng dụng chạy phía trình duyệt, không cần backend hay biến môi trường cho cấu hình hiện tại.
+- **Production Live:** [https://3d-blooming-bouquet-v1.vercel.app/](https://3d-blooming-bouquet-v1.vercel.app/)
+- Chạy `npm run build`, sau đó đưa nội dung thư mục `dist/` lên dịch vụ hosting tĩnh (Vercel, Netlify, GitHub Pages, Cloudflare Pages hoặc VPS cá nhân). Ứng dụng chạy phía trình duyệt, không cần backend hay biến môi trường cho cấu hình hiện tại.
 
 Cấu hình mặc định dùng đường dẫn tài nguyên từ gốc tên miền, ví dụ `/music.mp3`. Nếu triển khai dưới đường dẫn con, cần cấu hình `base` trong `vite.config.js` và điều chỉnh đường dẫn nhạc tương ứng. Google Fonts được tải từ bên ngoài; khi không có mạng, trình duyệt sử dụng phông dự phòng.
