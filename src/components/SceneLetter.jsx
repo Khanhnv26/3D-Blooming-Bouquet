@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, Calendar, Gift, CheckCircle2, RotateCcw, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Heart, Sparkles, Calendar, RotateCcw, ArrowLeft, Feather } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { audioManager } from '../utils/audio';
 
@@ -10,10 +10,7 @@ export default function SceneLetter({ config, onReplay }) {
   const [currentParaIndex, setCurrentParaIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
-  const [claimedVouchers, setClaimedVouchers] = useState({});
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [proposalAnswered, setProposalAnswered] = useState(false);
-  const [runawayOffset, setRunawayOffset] = useState({ x: 0, y: 0 });
+  const [floatingHearts, setFloatingHearts] = useState([]);
 
   const paragraphs = config.letter.paragraphs;
 
@@ -27,19 +24,19 @@ export default function SceneLetter({ config, onReplay }) {
   };
   const loveDays = calculateDays();
 
-  // Open letter action
+  // Open letter action with rich fanfare
   const handleOpenLetter = () => {
     setIsOpen(true);
-    audioManager.playChime();
+    audioManager.playMagicFanfare();
     confetti({
-      particleCount: 50,
-      spread: 70,
+      particleCount: 80,
+      spread: 85,
       origin: { y: 0.5 },
-      colors: ['#f43f5e', '#fb7185', '#fbbf24', '#fecdd3']
+      colors: ['#e11d48', '#f43f5e', '#fbbf24', '#fbcfe8', '#fff1f2'],
     });
   };
 
-  // Typewriter effect
+  // Typewriter effect for paragraphs
   useEffect(() => {
     if (!isOpen || isTypingComplete) return;
 
@@ -53,15 +50,14 @@ export default function SceneLetter({ config, onReplay }) {
     if (charIndex < currentText.length) {
       const timer = setTimeout(() => {
         setCharIndex((prev) => prev + 1);
-      }, 25);
+      }, 24);
       return () => clearTimeout(timer);
     } else {
-      // Finished typing this paragraph, wait slightly and move to next
       const timer = setTimeout(() => {
         setDisplayedParagraphs((prev) => [...prev, currentText]);
         setCurrentParaIndex((prev) => prev + 1);
         setCharIndex(0);
-      }, 400);
+      }, 380);
       return () => clearTimeout(timer);
     }
   }, [isOpen, currentParaIndex, charIndex, isTypingComplete, paragraphs]);
@@ -70,426 +66,358 @@ export default function SceneLetter({ config, onReplay }) {
   const handleSkipTypewriter = () => {
     setDisplayedParagraphs(paragraphs);
     setIsTypingComplete(true);
-  };
-
-  // Claim voucher
-  const handleClaimVoucher = (id) => {
     audioManager.playChime();
-    setClaimedVouchers((prev) => ({
-      ...prev,
-      [id]: true
-    }));
-    confetti({
-      particleCount: 30,
-      spread: 60,
-      origin: { y: 0.8 },
-      colors: ['#ec4899', '#f59e0b', '#3b82f6']
-    });
   };
 
-  // Playful runaway button for "Hơi hơi thôi"
-  const handleRunaway = () => {
-    const randomX = (Math.random() - 0.5) * 160;
-    const randomY = (Math.random() - 0.5) * 90;
-    setRunawayOffset({ x: randomX, y: randomY });
+  // Re-read letter animation
+  const handleReRead = () => {
+    setDisplayedParagraphs([]);
+    setCurrentParaIndex(0);
+    setCharIndex(0);
+    setIsTypingComplete(false);
+    audioManager.playChime();
   };
 
-  const handleAcceptProposal = () => {
-    setProposalAnswered(true);
+  // Trigger heart burst
+  const handleLoveBurst = (e) => {
     audioManager.playChime();
     confetti({
-      particleCount: 120,
-      spread: 100,
-      origin: { y: 0.6 },
-      colors: ['#e11d48', '#f43f5e', '#fb7185', '#fde047', '#38bdf8']
+      particleCount: 60,
+      spread: 75,
+      origin: { y: 0.7 },
+      colors: ['#f43f5e', '#fb7185', '#fbbf24', '#fda4af'],
     });
+
+    // Add floating emoji heart
+    const id = Date.now() + Math.random();
+    setFloatingHearts((prev) => [...prev.slice(-6), { id, x: (Math.random() - 0.5) * 200 }]);
+    setTimeout(() => {
+      setFloatingHearts((prev) => prev.filter((h) => h.id !== id));
+    }, 2000);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="relative z-10 w-full max-w-3xl mx-auto px-4 py-6 flex flex-col items-center"
-    >
-      {/* Return to 3D bouquet button */}
-      <div className="w-full flex justify-between items-center mb-4">
-        <button
-          onClick={onReplay}
-          className="inline-flex items-center gap-1.5 px-4 py-1.8 rounded-full bg-white/85 hover:bg-white text-rose-700 hover:text-rose-900 text-xs sm:text-sm font-semibold border border-rose-200/90 shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"
-          title="Quay lại ngắm bó hoa 3D"
-        >
-          <ArrowLeft className="w-4 h-4 text-rose-500" />
-          <span>Quay lại ngắm bó hoa 3D 💐</span>
-        </button>
+    <div className="relative z-10 w-full min-h-screen py-8 px-4 flex flex-col items-center justify-start overflow-x-hidden">
+      {/* Gentle drifting ambient background particles */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {Array.from({ length: 14 }).map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{
+              y: -50,
+              x: `${(i / 14) * 100}%`,
+              opacity: 0,
+              rotate: 0,
+            }}
+            animate={{
+              y: '105vh',
+              x: `${(i / 14) * 100 + Math.sin(i) * 10}%`,
+              opacity: [0, 0.45, 0.6, 0],
+              rotate: 360,
+            }}
+            transition={{
+              duration: 12 + (i % 6) * 3,
+              repeat: Infinity,
+              delay: (i * 1.5) % 8,
+              ease: 'linear',
+            }}
+            className="absolute text-rose-300/40 text-lg sm:text-xl select-none"
+          >
+            {i % 3 === 0 ? '🌸' : i % 3 === 1 ? '✨' : '💖'}
+          </motion.div>
+        ))}
       </div>
 
-      {/* If envelope is NOT opened yet */}
+      {/* Top Navigation Bar */}
+      <div className="relative z-20 w-full max-w-2xl flex items-center justify-between mb-6">
+        <button
+          onClick={onReplay}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-900/80 hover:bg-stone-800 text-rose-200 text-xs sm:text-sm font-semibold border border-rose-500/30 shadow-lg backdrop-blur-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          title="Quay lại ngắm bó hoa 3D"
+        >
+          <ArrowLeft className="w-4 h-4 text-rose-400" />
+          <span>Quay lại ngắm bó hoa 3D 💐</span>
+        </button>
+
+        {isOpen && (
+          <button
+            onClick={handleLoveBurst}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white text-xs sm:text-sm font-bold shadow-lg shadow-rose-500/40 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <Heart className="w-4 h-4 fill-white" />
+            <span>Thả tim yêu thương</span>
+          </button>
+        )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 1. SEALED ENVELOPE STAGE (Khi chưa mở thư)                                  */}
+      {/* ========================================================================= */}
       {!isOpen ? (
-        <div className="flex flex-col items-center justify-center min-h-[75vh] text-center">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mb-8"
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs sm:text-sm font-semibold tracking-wide border border-rose-200 shadow-sm mb-3">
-              💌 Bức thư sáp niêm phong
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 30 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.7, type: 'spring', damping: 22 }}
+          className="relative z-20 flex flex-col items-center justify-center my-auto min-h-[68vh] text-center max-w-lg"
+        >
+          {/* Header Title */}
+          <div className="mb-8">
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-950/80 text-rose-300 text-xs sm:text-sm font-semibold tracking-wider uppercase border border-rose-500/40 shadow-sm mb-3">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Bức Thư Tình Dành Riêng Cho Em</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             </span>
-            <h2 className="font-serif-romantic text-3xl sm:text-4xl font-bold text-rose-950">
-              Gửi Cô Gái Của Anh
+            <h2 className="font-serif-romantic text-3xl sm:text-4xl font-bold text-rose-100 drop-shadow-[0_2px_20px_rgba(244,63,94,0.6)]">
+              Gửi Người Anh Thương Nhất 🌸
             </h2>
-            <p className="text-stone-500 text-sm mt-1">
-              Chạm vào con dấu sáp trái tim để mở ra những lời tự đáy lòng...
+            <p className="text-rose-200/80 text-xs sm:text-sm mt-2 max-w-md mx-auto leading-relaxed">
+              Trái tim anh đã gửi trọn vào những dòng chữ này. Hãy chạm vào con dấu sáp đỏ để mở thư...
             </p>
-          </motion.div>
+          </div>
 
-          {/* 3D Vintage Envelope */}
+          {/* 3D-feel Realistic Sealed Envelope */}
           <motion.div
-            whileHover={{ scale: 1.04, rotate: 1 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.04, rotate: 0.5 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleOpenLetter}
-            className="relative w-80 sm:w-96 h-52 sm:h-60 bg-gradient-to-br from-amber-50 to-rose-50 rounded-2xl border-2 border-rose-200/80 shadow-2xl shadow-rose-300/40 cursor-pointer flex items-center justify-center overflow-hidden group select-none"
+            className="relative w-84 sm:w-96 h-56 sm:h-64 rounded-3xl bg-gradient-to-br from-[#fffdf7] via-[#fff8ef] to-[#fcefe3] border-2 border-amber-200/80 shadow-[0_25px_60px_-15px_rgba(225,29,72,0.35)] cursor-pointer flex flex-col items-center justify-between p-6 select-none overflow-hidden group transition-all"
           >
-            {/* Envelope flap lines */}
-            <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-rose-100/60 to-transparent border-b border-rose-200/60 [clip-path:polygon(0_0,100%_0,50%_100%)]"></div>
+            {/* Triangular Flap Fold lines */}
+            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-amber-100/50 to-transparent border-b-2 border-amber-300/40 [clip-path:polygon(0_0,100%_0,50%_100%)]"></div>
 
-            {/* Post stamp top right */}
-            <div className="absolute top-4 right-4 w-12 h-14 border-2 border-dashed border-rose-300 rounded bg-white/80 p-1 flex flex-col items-center justify-center text-center shadow-xs">
-              <span className="text-[9px] uppercase tracking-tighter text-rose-400 font-bold">20.10</span>
-              <span className="text-base">🌸</span>
-              <span className="text-[7px] text-stone-400">LOVE</span>
+            {/* Subtle vintage postage stamp */}
+            <div className="absolute top-4 right-4 w-12 h-14 border-2 border-dashed border-rose-300/80 rounded bg-white/90 p-1 flex flex-col items-center justify-center text-center shadow-xs">
+              <span className="text-[8px] uppercase tracking-tighter text-rose-500 font-bold">20.10</span>
+              <span className="text-lg">💌</span>
+              <span className="text-[7px] text-amber-600 font-bold tracking-widest">LOVE</span>
             </div>
 
-            {/* Recipient name on envelope */}
-            <div className="text-center z-10 px-4 mt-6">
-              <p className="font-handwriting text-2xl sm:text-3xl text-rose-800 font-bold">
-                Kính gửi: {config.recipientName}
-              </p>
-              <p className="text-xs text-rose-500 font-medium mt-1">
+            {/* Fine satin ribbon crossing */}
+            <div className="absolute top-1/2 -translate-y-1/2 inset-x-0 h-4 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 opacity-70 shadow-xs border-y border-amber-500/30"></div>
+
+            {/* Recipient Details */}
+            <div className="text-center z-10 mt-6">
+              <span className="text-[11px] uppercase tracking-widest text-rose-400 font-bold">Thân gửi</span>
+              <h3 className="font-serif-romantic text-2xl sm:text-3xl text-rose-950 font-bold mt-0.5">
+                {config.recipientName}
+              </h3>
+              <p className="text-xs text-stone-500 mt-1 italic font-serif">
                 {config.occasion}
               </p>
             </div>
 
-            {/* Glowing Wax Seal Button in Center */}
+            {/* Royal Crimson Wax Seal Button */}
             <motion.div
               animate={{
-                scale: [1, 1.1, 1],
+                scale: [1, 1.08, 1],
                 boxShadow: [
-                  "0 0 0 0 rgba(225, 29, 72, 0.4)",
-                  "0 0 0 14px rgba(225, 29, 72, 0)",
-                  "0 0 0 0 rgba(225, 29, 72, 0.4)"
-                ]
+                  '0 0 0 0 rgba(225, 29, 72, 0.45)',
+                  '0 0 0 16px rgba(225, 29, 72, 0)',
+                  '0 0 0 0 rgba(225, 29, 72, 0.45)',
+                ],
               }}
-              transition={{ repeat: Infinity, duration: 2.2 }}
-              className="absolute z-20 w-16 h-16 rounded-full bg-gradient-to-tr from-rose-700 via-red-600 to-rose-500 border-2 border-amber-300/60 flex items-center justify-center shadow-lg cursor-pointer"
+              transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
+              className="absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-tr from-rose-800 via-red-600 to-rose-700 border-2 border-amber-300/90 flex items-center justify-center shadow-xl cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-full border border-rose-300/40 flex items-center justify-center bg-rose-700/60">
+              <div className="w-12 h-12 rounded-full border border-rose-300/50 flex items-center justify-center bg-rose-900/60 shadow-inner">
                 <Heart className="w-6 h-6 text-amber-200 fill-amber-200 drop-shadow-sm" />
               </div>
             </motion.div>
 
-            {/* Gentle prompt bottom */}
-            <div className="absolute bottom-3 text-[11px] text-rose-400 font-medium flex items-center gap-1 group-hover:text-rose-600">
-              <Sparkles className="w-3 h-3 text-amber-500 animate-spin" /> Chạm vào con dấu để mở
+            {/* Prompt at bottom */}
+            <div className="z-10 text-[11px] text-rose-500 font-semibold flex items-center gap-1.5 group-hover:text-rose-700 transition-colors">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-spin" />
+              <span>Chạm vào con dấu sáp để bẻ niêm phong thư</span>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       ) : (
-        /* The Unfolded Letter & Full Experience */
+        /* ========================================================================= */
+        /* 2. THE UNFOLDED MASTERPIECE LOVE LETTER                                   */
+        /* ========================================================================= */
         <motion.div
-          initial={{ opacity: 0, scale: 0.92, y: 30 }}
+          initial={{ opacity: 0, scale: 0.94, y: 35 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, type: "spring", bounce: 0.2 }}
-          className="w-full flex flex-col items-center gap-8"
+          transition={{ duration: 0.8, type: 'spring', damping: 24 }}
+          className="relative z-20 w-full max-w-2xl flex flex-col items-center"
         >
-          {/* Love Days Counter Header */}
+          {/* Days in Love Badge */}
           {loveDays && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/90 backdrop-blur-md border border-rose-200 shadow-md text-rose-800 text-sm font-medium"
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-stone-900/85 backdrop-blur-md border border-amber-400/40 shadow-xl text-rose-100 text-xs sm:text-sm font-semibold mb-6"
             >
-              <Calendar className="w-4 h-4 text-rose-500" />
+              <Calendar className="w-4 h-4 text-amber-400" />
               <span>Đôi ta đã cùng nhau đi qua</span>
-              <span className="font-bold text-rose-600 text-base px-1.5 py-0.5 bg-rose-100 rounded-md">
+              <span className="font-bold text-amber-300 text-base px-2 py-0.5 bg-rose-950/80 rounded-lg border border-amber-400/30">
                 {loveDays}
               </span>
-              <span>ngày hạnh phúc ❤️</span>
+              <span>ngày đong đầy yêu thương ❤️</span>
             </motion.div>
           )}
 
-          {/* Authentic Vintage Letter Paper */}
-          <div className="relative w-full bg-[#fdfbf7] border border-amber-200/90 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-rose-200/50 text-left overflow-hidden">
-            {/* Elegant corner ornaments */}
-            <div className="absolute top-3 left-4 text-amber-300/60 font-serif text-xl select-none">❧</div>
-            <div className="absolute top-3 right-4 text-amber-300/60 font-serif text-xl select-none">☙</div>
-            <div className="absolute bottom-3 left-4 text-amber-300/60 font-serif text-xl select-none">❧</div>
-            <div className="absolute bottom-3 right-4 text-amber-300/60 font-serif text-xl select-none">☙</div>
+          {/* Luxury Cotton Parchment Letter Container */}
+          <div className="relative w-full bg-[#fdfbf7] rounded-3xl p-7 sm:p-12 shadow-[0_25px_60px_-15px_rgba(225,29,72,0.3),0_0_50px_rgba(251,191,36,0.12)] border-2 border-amber-300/60 overflow-hidden text-left">
+            {/* Fine Inner Filigree Border Frame */}
+            <div className="absolute inset-3 sm:inset-4 border border-amber-200/50 rounded-2xl pointer-events-none"></div>
 
-            {/* Skip typewriter button */}
+            {/* Elegant Corner Engravings (SVG Botanical Flourishes) */}
+            <svg
+              className="absolute top-4 left-4 w-8 h-8 text-amber-400/60 pointer-events-none"
+              viewBox="0 0 40 40"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M4 36V12C4 7.58 7.58 4 12 4H36" />
+              <path d="M10 28V14C10 11.79 11.79 10 14 10H28" />
+              <circle cx="12" cy="12" r="2.5" fill="currentColor" opacity="0.6" />
+            </svg>
+            <svg
+              className="absolute top-4 right-4 w-8 h-8 text-amber-400/60 pointer-events-none rotate-90"
+              viewBox="0 0 40 40"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M4 36V12C4 7.58 7.58 4 12 4H36" />
+              <path d="M10 28V14C10 11.79 11.79 10 14 10H28" />
+              <circle cx="12" cy="12" r="2.5" fill="currentColor" opacity="0.6" />
+            </svg>
+            <svg
+              className="absolute bottom-4 left-4 w-8 h-8 text-amber-400/60 pointer-events-none -rotate-90"
+              viewBox="0 0 40 40"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M4 36V12C4 7.58 7.58 4 12 4H36" />
+              <path d="M10 28V14C10 11.79 11.79 10 14 10H28" />
+              <circle cx="12" cy="12" r="2.5" fill="currentColor" opacity="0.6" />
+            </svg>
+            <svg
+              className="absolute bottom-4 right-4 w-8 h-8 text-amber-400/60 pointer-events-none rotate-180"
+              viewBox="0 0 40 40"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path d="M4 36V12C4 7.58 7.58 4 12 4H36" />
+              <path d="M10 28V14C10 11.79 11.79 10 14 10H28" />
+              <circle cx="12" cy="12" r="2.5" fill="currentColor" opacity="0.6" />
+            </svg>
+
+            {/* Fast-forward Typewriter Button */}
             {!isTypingComplete && (
               <button
                 onClick={handleSkipTypewriter}
-                className="absolute top-4 right-8 text-xs font-semibold px-3 py-1 rounded-full bg-rose-100/80 hover:bg-rose-200 text-rose-700 transition-colors"
+                className="absolute top-5 right-6 z-20 text-[11px] font-bold px-3 py-1 rounded-full bg-rose-100 hover:bg-rose-200 text-rose-700 transition-colors shadow-xs cursor-pointer flex items-center gap-1"
+                title="Đọc toàn bộ thư ngay"
               >
-                Đọc toàn bộ thư ⚡
+                <Feather className="w-3 h-3 text-rose-500" />
+                <span>Đọc hết ngay ⚡</span>
               </button>
             )}
 
-            {/* Salutation */}
-            <div className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-900 mb-6 border-b border-rose-100 pb-3 flex items-center justify-between">
-              <span>{config.letter.salutation}</span>
-              <span className="text-sm font-sans font-normal text-rose-400">20.10.2026</span>
+            {/* Salutation & Vintage Date */}
+            <div className="relative border-b border-rose-200/60 pb-5 mb-7 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1.5">
+              <h2 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-950 tracking-tight">
+                {config.letter.salutation}
+              </h2>
+              <span className="font-serif italic text-xs sm:text-sm text-stone-500">
+                Ngày 20 tháng 10 năm 2026
+              </span>
             </div>
 
-            {/* Body paragraphs with Typewriter effect */}
-            <div className="space-y-4 text-stone-700 text-base sm:text-lg leading-relaxed font-sans">
+            {/* Body Paragraphs with Organic Typewriter Motion */}
+            <div className="space-y-5 text-stone-800 text-base sm:text-lg leading-relaxed font-serif">
               {displayedParagraphs.map((para, idx) => (
-                <p key={idx} className="indent-4 sm:indent-6">
+                <motion.p
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="indent-6 sm:indent-8 text-justify leading-[1.85]"
+                >
                   {para}
-                </p>
+                </motion.p>
               ))}
 
               {!isTypingComplete && currentParaIndex < paragraphs.length && (
-                <p className="indent-4 sm:indent-6 text-rose-950 font-medium">
+                <p className="indent-6 sm:indent-8 text-stone-900 leading-[1.85] text-justify font-serif">
                   {paragraphs[currentParaIndex].slice(0, charIndex)}
-                  <span className="inline-block w-1.5 h-5 bg-rose-500 ml-1 animate-pulse align-middle"></span>
+                  <span className="inline-block w-2 h-5 bg-rose-500 ml-1 rounded-xs animate-pulse align-middle shadow-xs"></span>
                 </p>
               )}
             </div>
 
             {/* Closing & Handwritten Signature */}
-            <div className="mt-8 pt-6 border-t border-rose-100 flex flex-col items-end">
-              <span className="text-stone-500 text-sm italic">{config.letter.closing}</span>
-              <span className="font-handwriting text-3xl sm:text-4xl text-rose-700 font-bold mt-1 tracking-wide">
-                {config.senderName}
-              </span>
-            </div>
-          </div>
-
-          {/* Polaroid Photo Gallery */}
-          {config.photos && config.photos.length > 0 && (
-            <div className="w-full mt-4">
-              <div className="text-center mb-6">
-                <span className="text-xs uppercase tracking-widest text-rose-500 font-bold">
-                  Khoảnh khắc đôi ta
-                </span>
-                <h3 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-950">
-                  Cuốn Phim Kỷ Niệm 📷
-                </h3>
-                <p className="text-xs text-stone-500 mt-1">
-                  Chạm vào từng tấm ảnh để phóng to và xem lời thì thầm
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-4 px-2">
-                {config.photos.map((photo, index) => {
-                  const tilts = ['-rotate-2', 'rotate-2', '-rotate-1', 'rotate-3'];
-                  const tiltClass = tilts[index % tilts.length];
-
-                  return (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05, rotate: 0, zIndex: 10 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setSelectedPhoto(photo)}
-                      className={`relative bg-white p-3.5 pb-6 rounded-lg shadow-xl shadow-stone-300/40 border border-stone-200/60 cursor-pointer transition-transform duration-300 ${tiltClass}`}
-                    >
-                      {/* Realistic Washi Tape at Top */}
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-5 bg-rose-200/70 backdrop-blur-xs rounded-xs shadow-xs rotate-1 z-10 border-t border-b border-rose-300/40"></div>
-
-                      {/* Image container */}
-                      <div className="w-full aspect-[4/3] rounded overflow-hidden bg-rose-50 mb-3 relative group">
-                        <img
-                          src={photo.url}
-                          alt={photo.caption}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-rose-950/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium">
-                          Xem chi tiết ✨
-                        </div>
-                      </div>
-
-                      {/* Handwritten Caption */}
-                      <p className="font-casual text-base font-bold text-stone-800 line-clamp-2 text-center leading-snug">
-                        {photo.caption}
-                      </p>
-                      {photo.date && (
-                        <p className="text-[11px] text-stone-400 text-center mt-1">
-                          {photo.date}
-                        </p>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Photo Modal Lightbox */}
-          <AnimatePresence>
-            {selectedPhoto && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setSelectedPhoto(null)}
-                className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
-              >
-                <motion.div
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.85, opacity: 0 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="bg-white p-4 pb-6 rounded-2xl max-w-lg w-full shadow-2xl relative"
-                >
-                  <img
-                    src={selectedPhoto.url}
-                    alt={selectedPhoto.caption}
-                    className="w-full max-h-[60vh] object-contain rounded-lg mb-4 bg-stone-100"
-                  />
-                  <div className="text-center px-2">
-                    <p className="font-casual text-2xl font-bold text-rose-900 mb-1">
-                      {selectedPhoto.caption}
-                    </p>
-                    <p className="text-xs text-stone-400">{selectedPhoto.date}</p>
-                  </div>
-                  <button
-                    onClick={() => setSelectedPhoto(null)}
-                    className="mt-5 w-full py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm transition-colors shadow-md"
-                  >
-                    Đóng lại
-                  </button>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* 20/10 Cute Vouchers */}
-          {config.vouchers && config.vouchers.length > 0 && (
-            <div className="w-full mt-6">
-              <div className="text-center mb-6">
-                <span className="text-xs uppercase tracking-widest text-rose-500 font-bold">
-                  Quà tặng đặc biệt 20/10
-                </span>
-                <h3 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-950">
-                  Phiếu Đặc Quyền Dành Riêng Cho Em 🎁
-                </h3>
-                <p className="text-xs text-stone-500 mt-1">
-                  Chạm vào từng phiếu quà để kích hoạt đặc quyền vĩnh viễn
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {config.vouchers.map((voucher) => {
-                  const isClaimed = claimedVouchers[voucher.id];
-
-                  return (
-                    <motion.div
-                      key={voucher.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleClaimVoucher(voucher.id)}
-                      className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-4 overflow-hidden ${
-                        isClaimed
-                          ? 'bg-rose-50/90 border-rose-400 shadow-md shadow-rose-200'
-                          : 'bg-white border-dashed border-rose-200 hover:border-rose-300 shadow-sm'
-                      }`}
-                    >
-                      {/* Left Icon */}
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-100 to-amber-100 flex items-center justify-center text-2xl shrink-0 shadow-inner">
-                        {voucher.icon}
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 text-left">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-rose-950 text-sm sm:text-base">
-                            {voucher.title}
-                          </h4>
-                          {isClaimed && (
-                            <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-                          {voucher.desc}
-                        </p>
-                        <span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          isClaimed ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'
-                        }`}>
-                          {isClaimed ? "✓ Đã kích hoạt đặc quyền" : voucher.status}
-                        </span>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Interactive Cute Proposal / Love Check at the bottom */}
-          <div className="w-full my-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-tr from-rose-100/90 via-pink-100/80 to-amber-100/70 border border-rose-200 shadow-xl text-center">
-            {!proposalAnswered ? (
-              <div>
-                <h4 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-950 mb-2">
-                  Em có yêu anh nhiều như đóa hoa này không? ❤️
-                </h4>
-                <p className="text-xs sm:text-sm text-stone-600 mb-6">
-                  Hãy chọn thật lòng nha cô gái đáng yêu của anh!
-                </p>
-
-                <div className="flex flex-wrap items-center justify-center gap-4 relative min-h-[55px]">
-                  {/* Button YES */}
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleAcceptProposal}
-                    className="px-8 py-3.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-rose-300 flex items-center gap-2"
-                  >
-                    Yêu nhiều lắmmm! 🥰
-                  </motion.button>
-
-                  {/* Playful Runaway Button NO */}
-                  <motion.button
-                    animate={{ x: runawayOffset.x, y: runawayOffset.y }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    onMouseEnter={handleRunaway}
-                    onTouchStart={handleRunaway}
-                    onClick={handleAcceptProposal}
-                    className="px-6 py-3 rounded-full bg-white/80 border border-rose-200 text-stone-600 hover:text-rose-600 text-xs sm:text-sm font-medium shadow-sm transition-colors"
-                  >
-                    Hơi hơi thôi 😜
-                  </motion.button>
+            <div className="mt-10 pt-6 border-t border-rose-200/60 flex flex-col sm:flex-row items-center justify-between gap-6">
+              {/* Embossed Wax Seal Watermark on Paper */}
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-700 to-red-600 flex items-center justify-center shadow-lg border border-amber-300/60">
+                  <Heart className="w-7 h-7 text-amber-200 fill-amber-200" />
+                </div>
+                <div className="text-left">
+                  <span className="text-[10px] uppercase font-bold text-rose-600 tracking-widest block">
+                    Niêm phong vĩnh cửu
+                  </span>
+                  <span className="text-xs text-stone-500 font-serif italic">
+                    Trọn một đời yêu thương
+                  </span>
                 </div>
               </div>
-            ) : (
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="space-y-3"
-              >
-                <div className="text-4xl animate-bounce">💖🎉💐</div>
-                <h4 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-900">
-                  Anh cũng yêu em nhiều nhất trên đời!
-                </h4>
-                <p className="text-stone-700 text-sm max-w-md mx-auto">
-                  Chúc công chúa một ngày 20/10 ngập tràn niềm vui, hoa và những nụ cười rạng rỡ nhất. Yêu em mãi mãi!
-                </p>
-              </motion.div>
-            )}
+
+              {/* Handwritten Signature */}
+              <div className="text-right">
+                <span className="text-stone-500 text-sm font-serif italic block mb-1">
+                  {config.letter.closing}
+                </span>
+                <span className="font-handwriting text-3xl sm:text-4xl text-rose-700 font-bold tracking-wide block">
+                  {config.senderName}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Replay experience button */}
-          <button
-            onClick={onReplay}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 hover:bg-white text-stone-600 hover:text-rose-600 text-xs sm:text-sm font-semibold border border-rose-200 shadow-sm transition-all"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span>Trải nghiệm lại từ đầu 🌸</span>
-          </button>
+          {/* Romantic Controls & Navigation */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 w-full">
+            <button
+              onClick={handleReRead}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-stone-900/80 hover:bg-stone-800 text-rose-200 text-xs sm:text-sm font-semibold border border-rose-500/30 shadow-md backdrop-blur-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4 text-rose-400" />
+              <span>Đọc lại thư 📜</span>
+            </button>
+
+            <button
+              onClick={onReplay}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-stone-900/80 hover:bg-stone-800 text-rose-200 text-xs sm:text-sm font-semibold border border-rose-500/30 shadow-md backdrop-blur-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4 text-rose-400" />
+              <span>Quay lại ngắm đóa hoa 3D 💐</span>
+            </button>
+          </div>
         </motion.div>
       )}
-    </motion.div>
+
+      {/* Floating Interactive Hearts Overlay */}
+      <AnimatePresence>
+        {floatingHearts.map((heart) => (
+          <motion.div
+            key={heart.id}
+            initial={{ opacity: 1, y: 0, scale: 0.5, x: heart.x }}
+            animate={{ opacity: 0, y: -260, scale: 1.6 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.8, ease: 'easeOut' }}
+            className="fixed bottom-24 pointer-events-none z-50 text-4xl select-none"
+          >
+            💖
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
   );
 }

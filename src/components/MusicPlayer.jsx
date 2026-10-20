@@ -34,12 +34,12 @@ export default function MusicPlayer({ audioUrl, songTitle }) {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="relative">
       <motion.button
         onClick={toggleMusic}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
-        className="group relative flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-white/70 backdrop-blur-md border border-rose-200/80 shadow-lg shadow-rose-200/40 text-rose-700 transition-all hover:bg-white hover:border-rose-300"
+        className="group relative flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-stone-900/85 backdrop-blur-md border border-rose-500/35 shadow-xl text-rose-200 transition-all hover:bg-stone-800 hover:border-rose-400 cursor-pointer"
         title={isPlaying ? "Tắt nhạc" : "Bật nhạc lofi tình cảm"}
       >
         {/* Spinning Vinyl Disc */}
@@ -67,10 +67,10 @@ export default function MusicPlayer({ audioUrl, songTitle }) {
 
         {/* Dynamic Equalizer Bar or Title */}
         <div className="hidden sm:flex flex-col text-left">
-          <span className="text-xs font-semibold tracking-wide text-rose-800 line-clamp-1 max-w-[130px]">
+          <span className="text-xs font-semibold tracking-wide text-rose-100 line-clamp-1 max-w-[130px]">
             {songTitle || "Giai điệu 20.10"}
           </span>
-          <span className="text-[10px] text-rose-500 flex items-center gap-1 font-medium">
+          <span className="text-[10px] text-rose-400 flex items-center gap-1 font-medium">
             {isPlaying ? (
               <>
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>

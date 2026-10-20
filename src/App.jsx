@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { CONFIG } from './config';
-import BackgroundCanvas from './components/BackgroundCanvas';
 import MusicPlayer from './components/MusicPlayer';
+import FullscreenButton from './components/FullscreenButton';
 import SceneBloom from './components/SceneBloom';
 import SceneLetter from './components/SceneLetter';
-import { Heart } from 'lucide-react';
 
 export default function App() {
   const [currentScene, setCurrentScene] = useState(1); // 1: Bloom, 2: Letter
@@ -21,18 +20,26 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden bg-gradient-to-b from-[#fff7ed] via-[#fee2e2]/50 to-[#fdf2f8] text-stone-800 flex flex-col justify-between selection:bg-rose-200 selection:text-rose-900">
-      {/* Studio Radial Warm Spotlight for the Bouquet */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle_at_50%_42%,rgba(254,240,138,0.25)_0%,rgba(253,164,175,0.15)_45%,transparent_75%)]" />
+    <div
+      className={`relative ${
+        currentScene === 1 ? 'h-screen w-screen overflow-hidden' : 'min-h-screen w-full overflow-x-hidden'
+      } bg-gradient-to-b from-[#0a0714] via-[#1a0b2e] to-[#240618] text-rose-100 flex flex-col justify-between selection:bg-rose-500/30 selection:text-rose-200`}
+    >
+      {/* Warm Golden Candlelight Spotlight for the Bouquet */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle_at_50%_40%,rgba(251,191,36,0.18)_0%,rgba(225,29,72,0.12)_45%,transparent_75%)]" />
 
-      {/* Dynamic Romantic Background Canvas (Petals, Fireflies, Sparkles) */}
-      <BackgroundCanvas />
-
-      {/* Music Player Disc (Top Right) */}
-      <MusicPlayer audioUrl={CONFIG.audioUrl} songTitle={CONFIG.songTitle} />
+      {/* Floating Top-Right Controls (Fullscreen & Music) */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+        <FullscreenButton />
+        <MusicPlayer audioUrl={CONFIG.audioUrl} songTitle={CONFIG.songTitle} />
+      </div>
 
       {/* Main Interactive Stage with AnimatePresence Transitions */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center w-full py-4">
+      <main
+        className={`relative z-10 flex-1 flex flex-col items-center justify-center w-full ${
+          currentScene === 1 ? 'h-full w-full overflow-hidden p-0' : 'py-8'
+        }`}
+      >
         <AnimatePresence mode="wait">
           {currentScene === 1 && (
             <SceneBloom
@@ -51,13 +58,6 @@ export default function App() {
           )}
         </AnimatePresence>
       </main>
-
-      {/* Subtle Romantic Footer */}
-      <footer className="relative z-10 py-6 text-center text-xs text-rose-400 font-medium flex items-center justify-center gap-1.5 select-none">
-        <span>Thiết kế bằng trọn cả yêu thương</span>
-        <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 animate-pulse" />
-        <span>Gửi tặng {CONFIG.recipientName} ngày 20.10</span>
-      </footer>
     </div>
   );
 }
