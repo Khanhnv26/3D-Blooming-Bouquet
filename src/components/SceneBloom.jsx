@@ -197,8 +197,14 @@ export default function SceneBloom({ onNext, recipientName }) {
         <Canvas3DBoundary fallback={fallback}>
           <Suspense
             fallback={
-              <div className="absolute inset-0 flex items-center justify-center text-rose-500 font-casual text-xl animate-pulse">
-                Đang bung nở bó hoa 3D trong studio hoàng hôn… 🌸
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3.5 select-none pointer-events-none">
+                <div className="relative w-14 h-14 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-2 border-rose-500/30 border-t-amber-400 animate-spin" />
+                  <span className="text-2xl animate-pulse">🌸</span>
+                </div>
+                <span className="text-sm font-semibold tracking-wide text-rose-200/90 font-serif animate-pulse">
+                  Đang bung nở bó hoa 3D… ✨
+                </span>
               </div>
             }
           >

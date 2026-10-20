@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, RotateCcw, ArrowLeft, Feather, Sparkles } from 'lucide-react';
+import { Heart, RotateCcw, ArrowLeft, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { audioManager } from '../utils/audio';
 
@@ -591,18 +591,6 @@ export default function SceneLetter({ config, onReplay }) {
               <circle cx="12" cy="12" r="2.5" fill="currentColor" opacity="0.6" />
             </svg>
 
-            {/* Fast-forward Typewriter Button */}
-            {!isTypingComplete && (
-              <button
-                onClick={handleSkipTypewriter}
-                className="absolute top-5 right-6 z-20 text-[11px] font-bold px-3 py-1 rounded-full bg-rose-100/90 hover:bg-rose-200 text-rose-700 transition-colors shadow-xs cursor-pointer flex items-center gap-1 backdrop-blur-xs"
-                title="Đọc toàn bộ thư ngay"
-              >
-                <Feather className="w-3 h-3 text-rose-500" />
-                <span>Đọc hết ngay ⚡</span>
-              </button>
-            )}
-
             {/* Salutation & Vintage Date */}
             <div className="relative border-b border-rose-200/60 pb-5 mb-8 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1.5">
               <h2 className="font-serif-romantic text-2xl sm:text-3xl font-bold text-rose-950 tracking-tight">
@@ -630,16 +618,7 @@ export default function SceneLetter({ config, onReplay }) {
               {!isTypingComplete && currentParaIndex < paragraphs.length && (
                 <p className="indent-6 sm:indent-8 text-stone-900 text-justify font-serif">
                   {paragraphs[currentParaIndex].slice(0, charIndex)}
-                  <span className="inline-flex items-center ml-1 align-middle">
-                    <span className="inline-block w-2 h-5 bg-gradient-to-b from-rose-500 to-amber-500 rounded-xs animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
-                    <motion.span
-                      animate={{ scale: [0.9, 1.35, 0.9], opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 0.8, repeat: Infinity }}
-                      className="text-xs text-amber-500 ml-0.5 select-none"
-                    >
-                      ✨
-                    </motion.span>
-                  </span>
+                  <span className="inline-block w-[1.5px] h-[1.1em] bg-rose-800/70 ml-0.5 align-middle animate-pulse rounded-full" />
                 </p>
               )}
             </div>
