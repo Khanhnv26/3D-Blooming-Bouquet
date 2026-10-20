@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Sparkles, ContactShadows } from '@react-three/drei';
+import { OrbitControls, Sparkles, ContactShadows, Html } from '@react-three/drei';
 
 /* ------------------------------------------------------------------ */
 /* Math & Animation Helpers                                            */
@@ -1081,9 +1081,11 @@ function FallingPetals({ startRef }) {
 
 /* ------------------------------------------------------------------ */
 /* 3D Floating Love Letter Emerging From Bouquet Heart                */
+/* With Camera-Tracking Diagonal Theatrical Spotlight Beam            */
 /* ------------------------------------------------------------------ */
 function FloatingEnvelopeInner({ onOpenLetter }) {
   const groupRef = useRef();
+  const beamGroupRef = useRef();
   const beamMatRef = useRef();
   const beamCoreMatRef = useRef();
   const auraMatRef = useRef();
@@ -1092,11 +1094,7 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
   const [hovered, setHovered] = useState(false);
   const animProgress = useRef(0);
 
-  const spotTarget = useMemo(() => {
-    const obj = new THREE.Object3D();
-    obj.position.set(0, 1.10, 0.85);
-    return obj;
-  }, []);
+  const spotTarget = useMemo(() => new THREE.Object3D(), []);
 
   const flapGeo = useMemo(() => {
     const shape = new THREE.Shape();
@@ -1117,39 +1115,67 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
   }, []);
 
   useFrame((state, delta) => {
-    animProgress.current = THREE.MathUtils.damp(animProgress.current, 1, 2.4, delta);
+    animProgress.current = THREE.MathUtils.damp(animProgress.current, 1, 2.2, delta);
     const p = animProgress.current;
     const t = state.clock.elapsedTime;
     const smoothP = smooth(p);
 
+    // Emerge gracefully from inside bouquet heart up to crown eye-level (y = 1.45, z = 0.65)
+    const targetY = 0.55 + smoothP * 0.90 + Math.sin(t * 2.0) * 0.035;
+    const letterPos = new THREE.Vector3(0, targetY, 0.65);
+
     if (groupRef.current) {
-      // Emerge gracefully from inside bouquet heart up to eye-level front center (y = 1.10, z = 0.85)
-      const targetY = 0.25 + smoothP * 0.85 + Math.sin(t * 2.0) * 0.035;
-      groupRef.current.position.y = targetY;
-      groupRef.current.position.z = 0.35 + smoothP * 0.50;
-      groupRef.current.rotation.x = 0.16 + Math.sin(t * 1.4) * 0.025;
-      groupRef.current.rotation.y = Math.sin(t * 1.1) * 0.035;
-      groupRef.current.rotation.z = Math.sin(t * 1.7) * 0.02;
+      groupRef.current.position.copy(letterPos);
+      // Billboard towards camera so the envelope and wax seal are ALWAYS 100% visible from every viewing angle
+      groupRef.current.quaternion.copy(state.camera.quaternion);
+      groupRef.current.rotateX(0.12 + Math.sin(t * 1.5) * 0.02);
 
       const hoverScale = hovered ? 1.08 : 1.0;
       const s = (0.2 + 0.8 * smoothP) * hoverScale;
       groupRef.current.scale.set(s, s, s);
     }
 
+    // Dynamic diagonal light tracking: calculate source position relative to camera line of sight
+    const toCam = new THREE.Vector3().subVectors(state.camera.position, letterPos).normalize();
+    const up = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(up, toCam).normalize();
+
+    // Theatrical spotlight source positioned diagonally above and to the upper-right of camera
+    const lightPos = letterPos.clone()
+      .addScaledVector(toCam, 2.4)
+      .addScaledVector(up, 3.4)
+      .addScaledVector(right, 1.1);
+
     if (spotLightRef.current) {
-      spotLightRef.current.intensity = p * 4.5;
+      spotLightRef.current.position.copy(lightPos);
+      spotTarget.position.copy(letterPos);
+      spotLightRef.current.target = spotTarget;
+      spotLightRef.current.intensity = p * 5.5;
     }
+
     if (pointLightRef.current) {
-      pointLightRef.current.intensity = p * 2.6;
+      pointLightRef.current.intensity = p * 2.8;
     }
+
+    // Orient volumetric beam cone from lightPos down to letterPos dynamically every frame
+    if (beamGroupRef.current) {
+      const mid = new THREE.Vector3().addVectors(lightPos, letterPos).multiplyScalar(0.5);
+      const beamDir = new THREE.Vector3().subVectors(letterPos, lightPos).normalize();
+      const beamLen = lightPos.distanceTo(letterPos);
+
+      beamGroupRef.current.position.copy(mid);
+      beamGroupRef.current.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), beamDir);
+      beamGroupRef.current.scale.set(1, beamLen / 4.0, 1);
+    }
+
     if (beamMatRef.current) {
-      beamMatRef.current.opacity = (0.13 + Math.sin(t * 2.2) * 0.025) * p;
+      beamMatRef.current.opacity = (0.13 + Math.sin(t * 2.2) * 0.02) * p;
     }
     if (beamCoreMatRef.current) {
-      beamCoreMatRef.current.opacity = (0.22 + Math.sin(t * 2.8) * 0.035) * p;
+      beamCoreMatRef.current.opacity = (0.20 + Math.sin(t * 2.6) * 0.03) * p;
     }
     if (auraMatRef.current) {
-      auraMatRef.current.opacity = (0.28 + Math.sin(t * 2.0) * 0.05) * p;
+      auraMatRef.current.opacity = (0.32 + Math.sin(t * 2.0) * 0.06) * p;
     }
   });
 
@@ -1158,49 +1184,51 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
       {/* Target for overhead spotlight */}
       <primitive object={spotTarget} />
 
-      {/* 1. Dramatic Golden Theatrical Spotlight shining down on the letter */}
+      {/* 1. Dynamic Camera-Tracking Spotlight */}
       <spotLight
         ref={spotLightRef}
         position={[0, 5.2, 2.2]}
         target={spotTarget}
         color="#fffbeb"
         intensity={0}
-        angle={0.44}
-        penumbra={0.82}
-        distance={12}
+        angle={0.48}
+        penumbra={0.78}
+        distance={14}
         decay={1.2}
       />
 
-      {/* 2. Soft Volumetric God-Ray Light Cone (Outer Halo) */}
-      <mesh position={[0, 3.10, 1.45]} rotation-x={0.26} raycast={() => null}>
-        <cylinderGeometry args={[0.26, 1.5, 4.4, 32, 1, true]} />
-        <meshBasicMaterial
-          ref={beamMatRef}
-          color="#fef3c7"
-          transparent
-          opacity={0}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+      {/* 2. Dynamic Diagonal Volumetric Light Beam Tracking the Letter */}
+      <group ref={beamGroupRef} raycast={() => null}>
+        {/* Outer Soft Light Cone */}
+        <mesh>
+          <cylinderGeometry args={[0.18, 1.35, 4.0, 32, 1, true]} />
+          <meshBasicMaterial
+            ref={beamMatRef}
+            color="#fef9c3"
+            transparent
+            opacity={0}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+        {/* Inner Luminous Beam Core */}
+        <mesh>
+          <cylinderGeometry args={[0.08, 0.70, 4.0, 32, 1, true]} />
+          <meshBasicMaterial
+            ref={beamCoreMatRef}
+            color="#fef08a"
+            transparent
+            opacity={0}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </group>
 
-      {/* 3. Volumetric God-Ray Core (Inner Luminous Beam) */}
-      <mesh position={[0, 3.10, 1.45]} rotation-x={0.26} raycast={() => null}>
-        <cylinderGeometry args={[0.1, 0.8, 4.4, 32, 1, true]} />
-        <meshBasicMaterial
-          ref={beamCoreMatRef}
-          color="#fef08a"
-          transparent
-          opacity={0}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-
-      {/* 4. Golden Aura Ring at Bouquet Heart where letter emerges */}
-      <mesh position={[0, 0.45, 0.40]} rotation-x={-Math.PI / 2} raycast={() => null}>
+      {/* 3. Golden Aura Ring at Bouquet Heart where letter emerges */}
+      <mesh position={[0, 0.70, 0.55]} rotation-x={-Math.PI / 2} raycast={() => null}>
         <ringGeometry args={[0.15, 0.95, 32]} />
         <meshBasicMaterial
           ref={auraMatRef}
@@ -1213,21 +1241,21 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
         />
       </mesh>
 
-      {/* 5. Sparkling Fairy Dust motes rising within the Light Beam */}
+      {/* 4. Sparkling Fairy Dust motes dancing around the Letter */}
       <Sparkles
         count={35}
-        scale={[1.6, 2.4, 1.6]}
-        position={[0, 1.8, 0.85]}
+        scale={[1.8, 2.2, 1.8]}
+        position={[0, 1.55, 0.65]}
         size={3.8}
         speed={0.7}
         color="#fef08a"
-        opacity={0.8}
+        opacity={0.85}
       />
 
-      {/* 6. The Emerged 3D Love Letter Envelope */}
+      {/* 5. The Emerged 3D Love Letter Envelope */}
       <group
         ref={groupRef}
-        position={[0, 0.25, 0.35]}
+        position={[0, 0.55, 0.65]}
         onClick={(e) => {
           e.stopPropagation();
           if (animProgress.current < 0.5) return;
@@ -1249,11 +1277,11 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           position={[0, 0, 0.28]}
           color="#fef08a"
           intensity={0}
-          distance={3.6}
-          decay={2}
+          distance={3.8}
+          decay={1.8}
         />
 
-        {/* 6a. Envelope Body (Ivory handmade parchment with fine paper tooth) */}
+        {/* 5a. Envelope Body (Ivory handmade parchment with fine paper tooth) */}
         <mesh position={[0, 0, 0]}>
           <boxGeometry args={[1.26, 0.82, 0.024]} />
           <meshPhysicalMaterial
@@ -1268,7 +1296,7 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           />
         </mesh>
 
-        {/* 6b. Triangular Envelope Flap Folded Down */}
+        {/* 5b. Triangular Envelope Flap Folded Down */}
         <mesh geometry={flapGeo} position={[0, 0, 0.013]}>
           <meshPhysicalMaterial
             color="#fef8f0"
@@ -1282,18 +1310,18 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           />
         </mesh>
 
-        {/* 6c. Delicate Golden Foil Flap Border */}
+        {/* 5c. Delicate Golden Foil Flap Border */}
         <line geometry={flapBorderGeo} position={[0, 0, 0.015]}>
           <lineBasicMaterial color="#d97706" linewidth={2} />
         </line>
 
-        {/* 6d. Fine Satin Gold Ribbon across envelope */}
+        {/* 5d. Fine Satin Gold Ribbon across envelope */}
         <mesh position={[0, 0.02, 0.014]}>
           <boxGeometry args={[1.27, 0.09, 0.006]} />
           <meshStandardMaterial color="#f59e0b" roughness={0.45} metalness={0.4} />
         </mesh>
 
-        {/* 6e. Royal Crimson Wax Seal with Embossed Heart Emblem */}
+        {/* 5e. Royal Crimson Wax Seal with Embossed Heart Emblem */}
         <group position={[0, 0.02, 0.022]}>
           <mesh rotation-x={Math.PI / 2}>
             <cylinderGeometry args={[0.13, 0.14, 0.02, 32]} />
@@ -1310,6 +1338,15 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
             <meshStandardMaterial color="#fbbf24" roughness={0.35} metalness={0.6} />
           </mesh>
         </group>
+
+        {/* 5f. Subtle, elegant reminder badge beside the letter */}
+        <Html position={[0.78, 0.04, 0.02]} center distanceFactor={6.2}>
+          <div className="px-2.5 py-1 rounded-full bg-stone-900/85 backdrop-blur-md border border-amber-400/40 text-[11px] font-semibold text-amber-200 shadow-lg shadow-black/50 flex items-center gap-1.5 whitespace-nowrap select-none pointer-events-none animate-pulse">
+            <span>✨</span>
+            <span>Chạm để mở</span>
+            <span>💌</span>
+          </div>
+        </Html>
       </group>
     </>
   );
@@ -1353,9 +1390,29 @@ function Scene({
   onInteractEnd,
 }) {
   const startRef = useRef(null);
+  const controlsRef = useRef();
+  const camGlideProgress = useRef(0);
+
   useEffect(() => {
     startRef.current = null;
+    camGlideProgress.current = 0;
   }, [replayKey]);
+
+  useFrame((state, delta) => {
+    if (isLetterRevealed && controlsRef.current && camGlideProgress.current < 0.99) {
+      camGlideProgress.current = THREE.MathUtils.damp(camGlideProgress.current, 1, 2.2, delta);
+      const isPortrait = state.size.width < state.size.height;
+      const targetDist = isPortrait ? 5.8 : 4.8;
+      const targetY = isPortrait ? 1.62 : 1.52;
+
+      // Smoothly zoom in, elevate, and focus directly onto the illuminated love letter at eye level
+      state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, 0, delta * 3.4);
+      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, delta * 3.4);
+      state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetDist, delta * 3.4);
+      controlsRef.current.target.set(0, 1.25, 0.75);
+      controlsRef.current.update();
+    }
+  });
 
   const collectedSet = useMemo(() => new Set(collectedIds), [collectedIds]);
   const questSet = useMemo(() => new Set(questIds), [questIds]);
@@ -1415,6 +1472,7 @@ function Scene({
       <ResponsiveCamera />
 
       <OrbitControls
+        ref={controlsRef}
         enablePan={false}
         enableDamping
         autoRotate={!isLetterRevealed}
