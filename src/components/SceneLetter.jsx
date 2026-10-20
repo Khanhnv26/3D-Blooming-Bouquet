@@ -84,24 +84,113 @@ function FloatingRosePetals() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 2. Romantic Flickering Taper Candle with Golden Aura Glow           */
+/* 2. Floating Fireflies & Golden Embers Layer                        */
+/* ------------------------------------------------------------------ */
+function AmbientFireflies() {
+  const flies = useMemo(
+    () =>
+      Array.from({ length: 14 }).map((_, i) => ({
+        id: i,
+        left: `${(i * 7.1 + 4) % 92}%`,
+        top: `${(i * 8.5 + 8) % 86}%`,
+        size: 3 + (i % 3) * 1.5,
+        duration: 4.5 + (i % 4) * 1.6,
+        delay: (i * 0.6) % 3,
+      })),
+    []
+  );
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {flies.map((f) => (
+        <motion.div
+          key={f.id}
+          animate={{
+            y: [0, -18, 6, -14, 0],
+            x: [0, 14, -10, 8, 0],
+            opacity: [0.2, 0.85, 0.3, 0.9, 0.2],
+            scale: [1, 1.25, 0.9, 1.2, 1],
+          }}
+          transition={{
+            duration: f.duration,
+            repeat: Infinity,
+            delay: f.delay,
+            ease: 'easeInOut',
+          }}
+          style={{
+            left: f.left,
+            top: f.top,
+            width: f.size,
+            height: f.size,
+          }}
+          className="absolute rounded-full bg-amber-300 blur-[0.6px] shadow-[0_0_12px_rgba(251,191,36,0.95)]"
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Romantic Flickering Taper Candle with Dynamic Embers & Flares   */
 /* ------------------------------------------------------------------ */
 function RomanticCandle() {
+  const handleCandleClick = () => {
+    audioManager.playChime();
+    confetti({
+      particleCount: 25,
+      spread: 50,
+      origin: { x: 0.18, y: 0.35 },
+      colors: ['#fbbf24', '#fef08a', '#f59e0b', '#fff'],
+    });
+  };
+
   return (
-    <div className="relative flex flex-col items-center">
+    <div
+      onClick={handleCandleClick}
+      title="Chạm vào ngọn nến để bùng tia sáng ấm áp ✨"
+      className="relative flex flex-col items-center cursor-pointer hover:scale-105 active:scale-95 transition-transform group"
+    >
       {/* Ambient Candlelight Radial Halo */}
-      <div className="absolute -top-14 w-52 h-52 rounded-full bg-amber-400/22 blur-2xl pointer-events-none animate-pulse" />
+      <motion.div
+        animate={{
+          scale: [1, 1.15, 0.95, 1.1, 1],
+          opacity: [0.22, 0.32, 0.20, 0.30, 0.22],
+        }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -top-14 w-56 h-56 rounded-full bg-amber-400/25 blur-2xl pointer-events-none"
+      />
+
+      {/* Rising Golden Embers / Sparkles from Flame */}
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          initial={{ y: 0, opacity: 0.9, scale: 1 }}
+          animate={{
+            y: -48 - i * 14,
+            x: [(i - 1) * 7, (1 - i) * 8, (i - 1) * 5],
+            opacity: [0.9, 0.4, 0],
+            scale: [1, 0.8, 0.2],
+          }}
+          transition={{
+            duration: 1.8 + i * 0.4,
+            repeat: Infinity,
+            delay: i * 0.6,
+            ease: 'easeOut',
+          }}
+          className="absolute -top-3 w-1.5 h-1.5 bg-amber-300 rounded-full blur-[0.5px] shadow-[0_0_8px_rgba(251,191,36,0.9)] pointer-events-none"
+        />
+      ))}
 
       {/* Flame */}
       <div className="relative z-10 flex flex-col items-center">
         <motion.div
           animate={{
-            scale: [1, 1.08, 0.94, 1.06, 1],
-            rotate: [-1.5, 2, -1, 1.5, -1.5],
-            y: [0, -1, 0, -1.5, 0],
+            scale: [1, 1.1, 0.92, 1.08, 1],
+            rotate: [-2, 2.5, -1.5, 2, -2],
+            y: [0, -1.5, 0, -2, 0],
           }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-4 h-9 bg-gradient-to-t from-amber-500 via-amber-300 to-amber-100 rounded-[50%_50%_35%_35%] shadow-[0_0_22px_rgba(251,191,36,0.85)] flex items-center justify-center"
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="w-4 h-9 bg-gradient-to-t from-amber-500 via-amber-300 to-amber-100 rounded-[50%_50%_35%_35%] shadow-[0_0_24px_rgba(251,191,36,0.9)] flex items-center justify-center group-hover:scale-125 transition-transform"
         >
           {/* Inner blue-white flame core */}
           <div className="w-1.5 h-3.5 bg-white/95 rounded-[50%_50%_30%_30%] mt-3.5 shadow-inner" />
@@ -125,11 +214,30 @@ function RomanticCandle() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 3. Vintage Botanical Dried Rose & Eucalyptus Sprig                 */
+/* 4. Vintage Botanical Dried Rose & Eucalyptus Sprig (Swaying)       */
 /* ------------------------------------------------------------------ */
 function DriedBotanicalSprig() {
+  const handleSprigClick = () => {
+    audioManager.playChime();
+    confetti({
+      particleCount: 22,
+      spread: 55,
+      origin: { x: 0.18, y: 0.65 },
+      colors: ['#e11d48', '#fda4af', '#f43f5e', '#fb7185'],
+    });
+  };
+
   return (
-    <div className="relative flex flex-col items-center rotate-6 opacity-85 hover:opacity-100 transition-opacity">
+    <motion.div
+      animate={{
+        rotate: [3, 7, 2, 6, 3],
+      }}
+      transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+      style={{ transformOrigin: 'bottom center' }}
+      onClick={handleSprigClick}
+      title="Chạm vào nhành hoa để rụng cánh hoa tình yêu 🌸"
+      className="relative flex flex-col items-center cursor-pointer hover:scale-110 active:scale-95 transition-transform group"
+    >
       <svg className="w-32 h-44 drop-shadow-md" viewBox="0 0 100 150" fill="none">
         {/* Central stem */}
         <path d="M50 145 C45 100 60 50 48 10" stroke="#78716c" strokeWidth="2.2" strokeLinecap="round" />
@@ -144,19 +252,47 @@ function DriedBotanicalSprig() {
           <circle cx="0" cy="-2" r="3" fill="#f43f5e" />
         </g>
       </svg>
-      <span className="text-[10px] text-amber-200/50 uppercase tracking-widest font-serif -mt-2">
-        Nhành hoa khô
-      </span>
-    </div>
+    </motion.div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* 4. Antique Gold & Rosewood Fountain Pen                            */
+/* 5. Antique Gold & Rosewood Fountain Pen (Dancing / Writing)        */
 /* ------------------------------------------------------------------ */
-function VintageFountainPen() {
+function VintageFountainPen({ isTyping }) {
+  const handlePenClick = () => {
+    audioManager.playChime();
+    confetti({
+      particleCount: 20,
+      spread: 50,
+      origin: { x: 0.82, y: 0.35 },
+      colors: ['#fbbf24', '#fef08a', '#d97706'],
+    });
+  };
+
   return (
-    <div className="relative flex flex-col items-center rotate-12 drop-shadow-xl select-none pointer-events-none">
+    <motion.div
+      animate={
+        isTyping
+          ? {
+              y: [0, -6, 2, -4, 0],
+              x: [0, 4, -3, 3, 0],
+              rotate: [12, 17, 9, 15, 12],
+            }
+          : {
+              rotate: [12, 14, 11, 13, 12],
+              y: [0, -2, 0, -1, 0],
+            }
+      }
+      transition={{
+        duration: isTyping ? 1.4 : 5.0,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+      onClick={handlePenClick}
+      title="Bút máy mạ vàng đang nắn nót từng dòng thư 🖋️"
+      className="relative flex flex-col items-center drop-shadow-xl cursor-pointer hover:scale-110 active:scale-95 transition-transform group"
+    >
       {/* Pen Barrel */}
       <div className="w-3.5 h-36 bg-gradient-to-r from-rose-950 via-rose-900 to-amber-950 rounded-t-full shadow-lg relative">
         {/* Gold Trim Rings */}
@@ -165,43 +301,67 @@ function VintageFountainPen() {
       </div>
 
       {/* Two-tone Gold Fountain Nib */}
-      <svg className="w-5 h-8 text-amber-300 -mt-0.5 drop-shadow-md" viewBox="0 0 24 36" fill="currentColor">
-        <path d="M12 36 L4 14 C4 8 7 0 12 0 C17 0 20 8 20 14 Z" fill="url(#fountainNibGrad)" />
-        <path d="M12 0 L12 24" stroke="#78350f" strokeWidth="1" />
-        <circle cx="12" cy="24" r="1.5" fill="#78350f" />
-        <defs>
-          <linearGradient id="fountainNibGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#d97706" />
-            <stop offset="50%" stopColor="#fef08a" />
-            <stop offset="100%" stopColor="#b45309" />
-          </linearGradient>
-        </defs>
-      </svg>
+      <div className="relative">
+        <svg className="w-5 h-8 text-amber-300 -mt-0.5 drop-shadow-md" viewBox="0 0 24 36" fill="currentColor">
+          <path d="M12 36 L4 14 C4 8 7 0 12 0 C17 0 20 8 20 14 Z" fill="url(#fountainNibGrad)" />
+          <path d="M12 0 L12 24" stroke="#78350f" strokeWidth="1" />
+          <circle cx="12" cy="24" r="1.5" fill="#78350f" />
+          <defs>
+            <linearGradient id="fountainNibGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#d97706" />
+              <stop offset="50%" stopColor="#fef08a" />
+              <stop offset="100%" stopColor="#b45309" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        {/* Dancing Golden Ink Sparkle at Nib while typing */}
+        {isTyping && (
+          <motion.div
+            animate={{ scale: [0.6, 1.4, 0.6], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 0.8, repeat: Infinity }}
+            className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,1)] pointer-events-none"
+          />
+        )}
+      </div>
 
       {/* Ink Shadow on Table */}
       <div className="w-14 h-1.5 bg-black/40 blur-xs rounded-full mt-1" />
-    </div>
+    </motion.div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* 5. Keepsake Wax Seal & Opened Envelope Decor                       */
+/* 6. Keepsake Wax Seal & Opened Envelope Decor (Interactive)         */
 /* ------------------------------------------------------------------ */
 function KeepsakeEnvelopeDecor() {
+  const handleEnvelopeClick = () => {
+    audioManager.playChime();
+    confetti({
+      particleCount: 25,
+      spread: 60,
+      origin: { x: 0.82, y: 0.65 },
+      colors: ['#e11d48', '#fda4af', '#f43f5e', '#fbbf24'],
+    });
+  };
+
   return (
-    <div className="flex flex-col items-center gap-2 -rotate-6 select-none pointer-events-none">
-      <div className="w-20 h-14 rounded-lg bg-stone-900/80 border border-amber-400/35 p-2 shadow-xl backdrop-blur-md flex flex-col items-center justify-center relative overflow-hidden">
+    <motion.div
+      whileHover={{ scale: 1.12, rotate: -2 }}
+      whileTap={{ scale: 0.94 }}
+      onClick={handleEnvelopeClick}
+      title="Chạm vào phong thư kỷ niệm để thả tim ❤️"
+      className="flex flex-col items-center gap-2 -rotate-6 cursor-pointer drop-shadow-xl select-none"
+    >
+      <div className="w-20 h-14 rounded-lg bg-stone-900/85 border border-amber-400/40 p-2 shadow-2xl backdrop-blur-md flex flex-col items-center justify-center relative overflow-hidden">
         {/* Gold Satin Ribbon Drape */}
-        <div className="absolute top-2 inset-x-0 h-2 bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600 opacity-80" />
+        <div className="absolute top-2.5 inset-x-0 h-2 bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600 opacity-90 shadow-xs" />
         {/* Heart Wax Seal */}
         <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-rose-900 to-red-600 border border-amber-300 flex items-center justify-center shadow-md relative z-10">
           <Heart className="w-3.5 h-3.5 text-amber-200 fill-amber-200" />
         </div>
       </div>
-      <span className="text-[10px] text-amber-200/60 uppercase tracking-widest font-serif">
-        Kỷ niệm 20.10
-      </span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -214,6 +374,7 @@ export default function SceneLetter({ config, onReplay }) {
   const [charIndex, setCharIndex] = useState(0);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState([]);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // Ensure all strings are strictly NFC normalized so Vietnamese diacritics are flawless
   const paragraphs = useMemo(
@@ -231,6 +392,18 @@ export default function SceneLetter({ config, onReplay }) {
       colors: ['#e11d48', '#f43f5e', '#fbbf24', '#fbcfe8', '#fff1f2'],
     });
   }, []);
+
+  // 3D Parallax Tilt Handler
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+    setMousePos({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
 
   // Typewriter effect for paragraphs
   useEffect(() => {
@@ -293,11 +466,18 @@ export default function SceneLetter({ config, onReplay }) {
   };
 
   return (
-    <div className="relative z-10 w-full min-h-screen py-10 px-4 sm:px-6 flex flex-col items-center justify-start overflow-x-hidden">
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative z-10 w-full min-h-screen py-10 px-4 sm:px-6 flex flex-col items-center justify-start overflow-x-hidden"
+    >
       {/* 1. Gentle Drifting Rose Petals & Golden Bokeh Layer */}
       <FloatingRosePetals />
 
-      {/* 2. Top Floating Navigation Bar */}
+      {/* 2. Floating Fireflies & Golden Embers */}
+      <AmbientFireflies />
+
+      {/* 3. Top Floating Navigation Bar */}
       <div className="relative z-20 w-full max-w-4xl flex items-center justify-between mb-8">
         <button
           onClick={onReplay}
@@ -318,26 +498,50 @@ export default function SceneLetter({ config, onReplay }) {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. DESKTOP STAGE: ROMANTIC WRITING DESK WITH FLANKING ATMOSPHERE ELEMENTS */}
+      {/* 4. DESKTOP STAGE: ROMANTIC WRITING DESK WITH FLANKING ATMOSPHERE ELEMENTS */}
       {/* ========================================================================= */}
       <div className="relative z-20 w-full max-w-6xl flex items-start justify-center gap-6 lg:gap-10">
         {/* Left Flank: Candlelight & Dried Rose Sprig (Shown on desktop/tablet) */}
-        <aside className="hidden lg:flex flex-col items-center gap-12 select-none pointer-events-none sticky top-28 pt-8">
+        <aside className="hidden lg:flex flex-col items-center gap-12 select-none sticky top-28 pt-8">
           <RomanticCandle />
           <DriedBotanicalSprig />
         </aside>
 
         {/* ========================================================================= */}
-        {/* THE MASTERPIECE LUXURY COTTON PARCHMENT LOVE LETTER                       */}
+        {/* THE MASTERPIECE LUXURY COTTON PARCHMENT LOVE LETTER WITH 3D PARALLAX TILT */}
         {/* ========================================================================= */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 25 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, type: 'spring', damping: 24 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            rotateX: -mousePos.y * 5,
+            rotateY: mousePos.x * 6,
+          }}
+          transition={{
+            opacity: { duration: 0.8 },
+            scale: { duration: 0.8 },
+            y: { duration: 0.8 },
+            rotateX: { type: 'spring', stiffness: 220, damping: 25 },
+            rotateY: { type: 'spring', stiffness: 220, damping: 25 },
+          }}
+          style={{ transformPerspective: 1200, transformStyle: 'preserve-3d' }}
           className="relative z-20 w-full max-w-2xl sm:max-w-3xl flex flex-col items-center"
         >
           {/* Luxury Double-Bezel Cotton Parchment Container */}
           <div className="relative w-full bg-[#fdfbf7] rounded-3xl p-8 sm:p-14 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.6),0_0_60px_rgba(251,191,36,0.1)] border-2 border-amber-300/60 overflow-hidden text-left">
+            {/* Dynamic Metallic Light Sheen sweeping with mouse angle */}
+            <div
+              className="absolute inset-0 pointer-events-none rounded-3xl opacity-30 transition-opacity duration-300"
+              style={{
+                background: `linear-gradient(${120 + mousePos.x * 40}deg, transparent 30%, rgba(254, 240, 138, 0.35) ${50 + mousePos.x * 30}%, transparent 70%)`,
+              }}
+            />
+
+            {/* Candlelight Warmth Aura on Paper Left Flank */}
+            <div className="absolute -left-12 top-1/4 w-36 h-72 bg-gradient-to-r from-amber-400/18 via-amber-300/8 to-transparent rounded-full blur-2xl pointer-events-none animate-pulse" />
+
             {/* Fine Inner Filigree Border Frame */}
             <div className="absolute inset-3 sm:inset-4 border border-amber-200/50 rounded-2xl pointer-events-none"></div>
 
@@ -426,7 +630,16 @@ export default function SceneLetter({ config, onReplay }) {
               {!isTypingComplete && currentParaIndex < paragraphs.length && (
                 <p className="indent-6 sm:indent-8 text-stone-900 text-justify font-serif">
                   {paragraphs[currentParaIndex].slice(0, charIndex)}
-                  <span className="inline-block w-2 h-5 bg-rose-500 ml-1 rounded-xs animate-pulse align-middle shadow-xs"></span>
+                  <span className="inline-flex items-center ml-1 align-middle">
+                    <span className="inline-block w-2 h-5 bg-gradient-to-b from-rose-500 to-amber-500 rounded-xs animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                    <motion.span
+                      animate={{ scale: [0.9, 1.35, 0.9], opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                      className="text-xs text-amber-500 ml-0.5 select-none"
+                    >
+                      ✨
+                    </motion.span>
+                  </span>
                 </p>
               )}
             </div>
@@ -481,8 +694,8 @@ export default function SceneLetter({ config, onReplay }) {
         </motion.div>
 
         {/* Right Flank: Vintage Fountain Pen & Keepsake Envelope (Shown on desktop/tablet) */}
-        <aside className="hidden lg:flex flex-col items-center gap-14 select-none pointer-events-none sticky top-28 pt-8">
-          <VintageFountainPen />
+        <aside className="hidden lg:flex flex-col items-center gap-14 select-none sticky top-28 pt-8">
+          <VintageFountainPen isTyping={!isTypingComplete} />
           <KeepsakeEnvelopeDecor />
         </aside>
       </div>
