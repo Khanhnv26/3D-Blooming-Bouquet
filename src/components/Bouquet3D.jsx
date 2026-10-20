@@ -2,6 +2,8 @@ import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Sparkles, ContactShadows, Html } from '@react-three/drei';
+import confetti from 'canvas-confetti';
+import { audioManager } from '../utils/audio';
 
 /* ------------------------------------------------------------------ */
 /* Math & Animation Helpers                                            */
@@ -82,15 +84,140 @@ function createBokehTexture() {
   return texture;
 }
 
+function createSpotlightBeamTexture() {
+  if (typeof document === 'undefined') return null;
+  const w = 64;
+  const h = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  const imgData = ctx.createImageData(w, h);
+  const data = imgData.data;
+
+  for (let y = 0; y < h; y++) {
+    const v = y / (h - 1); // 0 at top apex, 1 at bottom base
+    // Smooth bell curve fading to EXACT ZERO at both apex and base:
+    // sin(pi * v)^1.4 reaches 0 at v=0 and v=1 with zero hard cutoffs
+    const vertFade = Math.pow(Math.sin(v * Math.PI), 1.4);
+
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 4;
+      data[idx] = 254;     // R: warm golden champagne
+      data[idx + 1] = 230; // G
+      data[idx + 2] = 175; // B
+      data[idx + 3] = Math.round(vertFade * 255); // Alpha
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function createParchmentLetterTexture() {
+  if (typeof document === 'undefined') return null;
+  const w = 512;
+  const h = 340;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  // 1. Luxury ivory parchment paper base
+  ctx.fillStyle = '#fffdf7';
+  ctx.fillRect(0, 0, w, h);
+
+  // 2. Soft warm paper vignette
+  const grad = ctx.createRadialGradient(w / 2, h / 2, 60, w / 2, h / 2, w / 1.5);
+  grad.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+  grad.addColorStop(0.65, 'rgba(254, 243, 199, 0.4)');
+  grad.addColorStop(1, 'rgba(245, 222, 179, 0.65)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // 3. Double gold filigree frame
+  ctx.strokeStyle = '#d97706';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(18, 18, w - 36, h - 36);
+
+  ctx.strokeStyle = 'rgba(217, 119, 6, 0.45)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(24, 24, w - 48, h - 48);
+
+  // Corner decorative flourishes
+  ctx.fillStyle = '#d97706';
+  [
+    [24, 24],
+    [w - 24, 24],
+    [24, h - 24],
+    [w - 24, h - 24],
+  ].forEach(([cx, cy]) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 4. Romantic cursive calligraphy lines (mimicking handwritten love letter)
+  ctx.fillStyle = '#92400e';
+  ctx.font = 'bold 22px "Playfair Display", serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Gửi Người Thương', w / 2, 65);
+
+  ctx.fillStyle = '#e11d48';
+  ctx.font = '16px serif';
+  ctx.fillText('❦ 20.10 ❦', w / 2, 90);
+
+  // Handwritten cursive wavy lines
+  ctx.strokeStyle = 'rgba(120, 53, 15, 0.55)';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  const lines = [
+    { y: 125, w: 360 },
+    { y: 155, w: 390 },
+    { y: 185, w: 340 },
+    { y: 215, w: 370 },
+    { y: 245, w: 290 },
+  ];
+  lines.forEach(({ y, w: lw }) => {
+    ctx.beginPath();
+    const startX = (w - lw) / 2;
+    ctx.moveTo(startX, y);
+    const steps = 24;
+    for (let i = 1; i <= steps; i++) {
+      const lx = startX + (lw / steps) * i;
+      const ly = y + Math.sin(i * 1.25) * 1.5;
+      ctx.lineTo(lx, ly);
+    }
+    ctx.stroke();
+  });
+
+  // Signature at bottom right
+  ctx.fillStyle = '#b45309';
+  ctx.font = 'italic 16px "Dancing Script", cursive';
+  ctx.textAlign = 'right';
+  ctx.fillText('Yêu em rất nhiều ♥', w - 45, 298);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
 let cachedTextures = null;
 function getSharedTextures() {
   if (!cachedTextures && typeof document !== 'undefined') {
     cachedTextures = {
       noise: createPaperNoiseTexture(),
       bokeh: createBokehTexture(),
+      beam: createSpotlightBeamTexture(),
+      letter: createParchmentLetterTexture(),
     };
   }
-  return cachedTextures || { noise: null, bokeh: null };
+  return cachedTextures || { noise: null, bokeh: null, beam: null, letter: null };
 }
 
 /* ------------------------------------------------------------------ */
@@ -1085,126 +1212,186 @@ function FallingPetals({ startRef }) {
 /* ------------------------------------------------------------------ */
 function FloatingEnvelopeInner({ onOpenLetter }) {
   const groupRef = useRef();
+  const flapRef = useRef();
+  const sealRef = useRef();
+  const sheetRef = useRef();
   const beamGroupRef = useRef();
   const beamMatRef = useRef();
   const beamCoreMatRef = useRef();
   const auraMatRef = useRef();
   const spotLightRef = useRef();
   const pointLightRef = useRef();
+
   const [hovered, setHovered] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
   const animProgress = useRef(0);
+  const openProgress = useRef(0);
+  const openComplete = useRef(false);
 
   const spotTarget = useMemo(() => new THREE.Object3D(), []);
 
+  // Flap triangular shape hinged at (0, 0, 0)
   const flapGeo = useMemo(() => {
     const shape = new THREE.Shape();
-    shape.moveTo(-0.61, 0.40);
-    shape.lineTo(0.61, 0.40);
-    shape.lineTo(0.0, 0.02);
+    shape.moveTo(-0.64, 0.0);
+    shape.lineTo(0.64, 0.0);
+    shape.lineTo(0.0, -0.34);
     shape.closePath();
     return new THREE.ShapeGeometry(shape);
   }, []);
 
   const flapBorderGeo = useMemo(() => {
     const pts = [
-      new THREE.Vector3(-0.61, 0.40, 0),
-      new THREE.Vector3(0.0, 0.02, 0),
-      new THREE.Vector3(0.61, 0.40, 0),
+      new THREE.Vector3(-0.64, 0.0, 0),
+      new THREE.Vector3(0.0, -0.34, 0),
+      new THREE.Vector3(0.64, 0.0, 0),
     ];
     return new THREE.BufferGeometry().setFromPoints(pts);
   }, []);
 
   useFrame((state, delta) => {
+    // 1. Initial emergence from bouquet
     animProgress.current = THREE.MathUtils.damp(animProgress.current, 1, 2.2, delta);
     const p = animProgress.current;
     const t = state.clock.elapsedTime;
     const smoothP = smooth(p);
 
-    // Emerge gracefully from inside bouquet heart up to crown eye-level (y = 1.45, z = 0.65)
-    const targetY = 0.55 + smoothP * 0.90 + Math.sin(t * 2.0) * 0.035;
+    // 2. Unfolding opening progression when clicked
+    if (isOpening) {
+      openProgress.current = THREE.MathUtils.damp(openProgress.current, 1, 2.8, delta);
+      if (openProgress.current >= 0.94 && !openComplete.current) {
+        openComplete.current = true;
+        onOpenLetter();
+      }
+    }
+    const op = openProgress.current;
+    const smoothOp = smooth(op);
+
+    // Elevated eye-level position so envelope hovers gracefully above flower crown:
+    // reaches ~1.65 (floating right above top petals without sinking into them)
+    const floatBob = Math.sin(t * 1.8) * 0.03 * (1.0 - smoothOp);
+    const targetY = 0.60 + smoothP * 1.05 + floatBob;
     const letterPos = new THREE.Vector3(0, targetY, 0.65);
 
-    if (groupRef.current) {
-      groupRef.current.position.copy(letterPos);
-      // Billboard towards camera so the envelope and wax seal are ALWAYS 100% visible from every viewing angle
-      groupRef.current.quaternion.copy(state.camera.quaternion);
-      groupRef.current.rotateX(0.12 + Math.sin(t * 1.5) * 0.02);
-
-      const hoverScale = hovered ? 1.08 : 1.0;
-      const s = (0.2 + 0.8 * smoothP) * hoverScale;
-      groupRef.current.scale.set(s, s, s);
-    }
-
-    // Dynamic diagonal light tracking: calculate source position relative to camera line of sight
+    // Calculate line of sight from camera to letter
     const toCam = new THREE.Vector3().subVectors(state.camera.position, letterPos).normalize();
     const up = new THREE.Vector3(0, 1, 0);
     const right = new THREE.Vector3().crossVectors(up, toCam).normalize();
 
-    // Theatrical spotlight source positioned diagonally above and to the upper-right of camera
+    // When opening, envelope glides gently forward towards camera
+    if (smoothOp > 0) {
+      letterPos.addScaledVector(toCam, smoothOp * 0.42);
+    }
+
+    if (groupRef.current) {
+      groupRef.current.position.copy(letterPos);
+      // Billboard towards camera so envelope and wax seal are ALWAYS 100% visible from every viewing angle
+      groupRef.current.quaternion.copy(state.camera.quaternion);
+      // Gentle romantic tilt when floating
+      groupRef.current.rotateX(0.10 * (1 - smoothOp) + Math.sin(t * 1.5) * 0.015 * (1 - smoothOp));
+
+      const hoverScale = (hovered && !isOpening) ? 1.08 : 1.0;
+      const s = (0.2 + 0.8 * smoothP) * hoverScale * (1 + smoothOp * 0.16);
+      groupRef.current.scale.set(s, s, s);
+    }
+
+    // 3. Flap Opening & Wax Seal Dissolving
+    if (sealRef.current) {
+      // Seal quickly shrinks & dissolves during first 22% of opening
+      const sealScale = clamp(1.0 - op / 0.22, 0, 1);
+      sealRef.current.scale.set(sealScale, sealScale, sealScale);
+      sealRef.current.visible = sealScale > 0.005;
+    }
+
+    if (flapRef.current) {
+      // Flap unfolds backwards around hinge axis from op 0.15 to 0.65
+      const flapNorm = clamp((op - 0.15) / 0.50, 0, 1);
+      const flapAngle = smooth(flapNorm) * Math.PI * 0.96;
+      flapRef.current.rotation.x = flapAngle;
+    }
+
+    if (sheetRef.current) {
+      // Parchment letter slides smoothly upwards out of envelope mouth from op 0.35 to 0.92
+      const sheetNorm = clamp((op - 0.35) / 0.57, 0, 1);
+      const sheetEase = smooth(sheetNorm);
+      sheetRef.current.position.y = -0.06 + sheetEase * 0.62;
+      sheetRef.current.position.z = 0.003 + sheetEase * 0.014;
+    }
+
+    // 4. Dynamic diagonal theatrical spotlight source positioned diagonally above-right of camera
     const lightPos = letterPos.clone()
-      .addScaledVector(toCam, 2.4)
+      .addScaledVector(toCam, 2.2)
       .addScaledVector(up, 3.4)
-      .addScaledVector(right, 1.1);
+      .addScaledVector(right, 1.0);
 
     if (spotLightRef.current) {
       spotLightRef.current.position.copy(lightPos);
       spotTarget.position.copy(letterPos);
       spotLightRef.current.target = spotTarget;
-      spotLightRef.current.intensity = p * 5.5;
+      // Gentle theatrical spotlight - warm & luminous without overexposure blowout
+      spotLightRef.current.intensity = p * (1.35 + smoothOp * 0.45);
     }
 
     if (pointLightRef.current) {
-      pointLightRef.current.intensity = p * 2.8;
+      // Soft local fill light on letter details
+      pointLightRef.current.intensity = p * (0.35 + smoothOp * 0.25);
     }
 
-    // Orient volumetric beam cone from lightPos down to letterPos dynamically every frame
+    // 5. Orient volumetric beam cone from lightPos down to letterPos dynamically every frame
     if (beamGroupRef.current) {
-      const mid = new THREE.Vector3().addVectors(lightPos, letterPos).multiplyScalar(0.5);
       const beamDir = new THREE.Vector3().subVectors(letterPos, lightPos).normalize();
-      const beamLen = lightPos.distanceTo(letterPos);
+      const beamDist = lightPos.distanceTo(letterPos);
+      const totalLen = beamDist + 0.6;
+      const beamEnd = lightPos.clone().addScaledVector(beamDir, totalLen);
+      const mid = new THREE.Vector3().addVectors(lightPos, beamEnd).multiplyScalar(0.5);
 
       beamGroupRef.current.position.copy(mid);
       beamGroupRef.current.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), beamDir);
-      beamGroupRef.current.scale.set(1, beamLen / 4.0, 1);
+      beamGroupRef.current.scale.set(1, totalLen / 4.0, 1);
     }
 
     if (beamMatRef.current) {
-      beamMatRef.current.opacity = (0.13 + Math.sin(t * 2.2) * 0.02) * p;
+      // Soft morning mist falloff - subtle & elegant
+      beamMatRef.current.opacity = (0.08 + Math.sin(t * 2.2) * 0.015) * p * (1 + smoothOp * 0.15);
     }
     if (beamCoreMatRef.current) {
-      beamCoreMatRef.current.opacity = (0.20 + Math.sin(t * 2.6) * 0.03) * p;
+      // Delicate luminous core
+      beamCoreMatRef.current.opacity = (0.12 + Math.sin(t * 2.6) * 0.02) * p * (1 + smoothOp * 0.15);
     }
     if (auraMatRef.current) {
-      auraMatRef.current.opacity = (0.32 + Math.sin(t * 2.0) * 0.06) * p;
+      auraMatRef.current.opacity = (0.24 + Math.sin(t * 2.0) * 0.05) * p * (1 - smoothOp * 0.6);
     }
   });
+
+  const textures = getSharedTextures();
 
   return (
     <>
       {/* Target for overhead spotlight */}
       <primitive object={spotTarget} />
 
-      {/* 1. Dynamic Camera-Tracking Spotlight */}
+      {/* 1. Dynamic Camera-Tracking Theatrical Spotlight (Softened angle & penumbra) */}
       <spotLight
         ref={spotLightRef}
         position={[0, 5.2, 2.2]}
         target={spotTarget}
         color="#fffbeb"
         intensity={0}
-        angle={0.48}
-        penumbra={0.78}
+        angle={0.52}
+        penumbra={0.92}
         distance={14}
         decay={1.2}
       />
 
-      {/* 2. Dynamic Diagonal Volumetric Light Beam Tracking the Letter */}
+      {/* 2. Soft Atmospheric Volumetric Light Beam Tracking the Letter */}
       <group ref={beamGroupRef} raycast={() => null}>
-        {/* Outer Soft Light Cone */}
+        {/* Outer Soft Light Cone with Zero-Alpha Border Falloff */}
         <mesh>
-          <cylinderGeometry args={[0.18, 1.35, 4.0, 32, 1, true]} />
+          <cylinderGeometry args={[0.22, 1.45, 4.0, 32, 1, true]} />
           <meshBasicMaterial
             ref={beamMatRef}
-            color="#fef9c3"
+            map={textures.beam}
+            color="#fde68a"
             transparent
             opacity={0}
             blending={THREE.AdditiveBlending}
@@ -1214,9 +1401,10 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
         </mesh>
         {/* Inner Luminous Beam Core */}
         <mesh>
-          <cylinderGeometry args={[0.08, 0.70, 4.0, 32, 1, true]} />
+          <cylinderGeometry args={[0.10, 0.78, 4.0, 32, 1, true]} />
           <meshBasicMaterial
             ref={beamCoreMatRef}
+            map={textures.beam}
             color="#fef08a"
             transparent
             opacity={0}
@@ -1245,26 +1433,35 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
       <Sparkles
         count={35}
         scale={[1.8, 2.2, 1.8]}
-        position={[0, 1.55, 0.65]}
+        position={[0, 1.65, 0.65]}
         size={3.8}
         speed={0.7}
         color="#fef08a"
         opacity={0.85}
       />
 
-      {/* 5. The Emerged 3D Love Letter Envelope */}
+      {/* 5. The Emerged 3D Love Letter Envelope with Fluid Unfolding Animation */}
       <group
         ref={groupRef}
-        position={[0, 0.55, 0.65]}
+        position={[0, 0.60, 0.65]}
         onClick={(e) => {
           e.stopPropagation();
-          if (animProgress.current < 0.5) return;
-          onOpenLetter();
+          if (animProgress.current < 0.6 || isOpening) return;
+          setIsOpening(true);
+          confetti({
+            particleCount: 50,
+            spread: 70,
+            origin: { y: 0.55 },
+            colors: ['#fbbf24', '#f43f5e', '#fef08a', '#fda4af'],
+          });
+          audioManager.playChime();
         }}
         onPointerOver={(e) => {
           e.stopPropagation();
-          setHovered(true);
-          document.body.style.cursor = 'pointer';
+          if (!isOpening) {
+            setHovered(true);
+            document.body.style.cursor = 'pointer';
+          }
         }}
         onPointerOut={() => {
           setHovered(false);
@@ -1277,76 +1474,112 @@ function FloatingEnvelopeInner({ onOpenLetter }) {
           position={[0, 0, 0.28]}
           color="#fef08a"
           intensity={0}
-          distance={3.8}
+          distance={4.2}
           decay={1.8}
         />
 
-        {/* 5a. Envelope Body (Ivory handmade parchment with fine paper tooth) */}
-        <mesh position={[0, 0, 0]}>
-          <boxGeometry args={[1.26, 0.82, 0.024]} />
+        {/* 5a. Envelope Back Plate (Warm artisanal ivory parchment) */}
+        <mesh position={[0, 0, -0.006]}>
+          <boxGeometry args={[1.28, 0.84, 0.008]} />
           <meshPhysicalMaterial
-            color="#fffdf7"
-            roughness={0.90}
+            color="#f7f2e7"
+            roughness={0.92}
             metalness={0.0}
             clearcoat={0.0}
-            sheen={0.3}
+            sheen={0.25}
             sheenColor={new THREE.Color('#fef08a')}
-            bumpMap={getSharedTextures().noise}
+            bumpMap={textures.noise}
             bumpScale={0.015}
           />
         </mesh>
 
-        {/* 5b. Triangular Envelope Flap Folded Down */}
-        <mesh geometry={flapGeo} position={[0, 0, 0.013]}>
+        {/* 5b. Handwritten Love Letter Sheet that slides up when opened */}
+        <mesh ref={sheetRef} position={[0, -0.06, 0.002]}>
+          <planeGeometry args={[1.18, 0.78]} />
+          <meshStandardMaterial
+            map={textures.letter}
+            roughness={0.75}
+            metalness={0.05}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* 5c. Envelope Front Pocket (Covers lower half so letter emerges out of it) */}
+        <mesh position={[0, -0.16, 0.008]}>
+          <boxGeometry args={[1.28, 0.52, 0.008]} />
           <meshPhysicalMaterial
-            color="#fef8f0"
-            roughness={0.90}
+            color="#f4ede0"
+            roughness={0.92}
             metalness={0.0}
             clearcoat={0.0}
-            sheen={0.3}
-            side={THREE.DoubleSide}
-            bumpMap={getSharedTextures().noise}
+            sheen={0.25}
+            sheenColor={new THREE.Color('#fef08a')}
+            bumpMap={textures.noise}
             bumpScale={0.015}
           />
         </mesh>
 
-        {/* 5c. Delicate Golden Foil Flap Border */}
-        <line geometry={flapBorderGeo} position={[0, 0, 0.015]}>
-          <lineBasicMaterial color="#d97706" linewidth={2} />
-        </line>
+        {/* Delicate golden rim on envelope pocket mouth */}
+        <mesh position={[0, 0.10, 0.013]}>
+          <boxGeometry args={[1.28, 0.012, 0.004]} />
+          <meshStandardMaterial color="#d97706" roughness={0.4} metalness={0.5} />
+        </mesh>
 
         {/* 5d. Fine Satin Gold Ribbon across envelope */}
-        <mesh position={[0, 0.02, 0.014]}>
-          <boxGeometry args={[1.27, 0.09, 0.006]} />
-          <meshStandardMaterial color="#f59e0b" roughness={0.45} metalness={0.4} />
+        <mesh position={[0, -0.16, 0.013]}>
+          <boxGeometry args={[1.29, 0.07, 0.004]} />
+          <meshStandardMaterial color="#d97706" roughness={0.45} metalness={0.4} />
         </mesh>
 
-        {/* 5e. Royal Crimson Wax Seal with Embossed Heart Emblem */}
-        <group position={[0, 0.02, 0.022]}>
-          <mesh rotation-x={Math.PI / 2}>
-            <cylinderGeometry args={[0.13, 0.14, 0.02, 32]} />
+        {/* 5e. Triangular Flap hinged at top edge y = 0.42 (flips backward on open) */}
+        <group ref={flapRef} position={[0, 0.42, 0.008]}>
+          <mesh geometry={flapGeo} position={[0, 0, 0]}>
             <meshPhysicalMaterial
-              color="#9f1239"
-              roughness={0.58}
-              metalness={0.05}
-              sheen={0.45}
-              sheenColor={new THREE.Color('#fda4af')}
+              color="#f7f2e7"
+              roughness={0.92}
+              metalness={0.0}
+              clearcoat={0.0}
+              sheen={0.25}
+              side={THREE.DoubleSide}
+              bumpMap={textures.noise}
+              bumpScale={0.015}
             />
           </mesh>
-          <mesh position={[0, 0, 0.012]} scale={[0.065, 0.065, 0.035]}>
-            <sphereGeometry args={[1, 16, 12]} />
-            <meshStandardMaterial color="#fbbf24" roughness={0.35} metalness={0.6} />
-          </mesh>
+
+          {/* Delicate Golden Foil Flap Border */}
+          <line geometry={flapBorderGeo} position={[0, 0, 0.002]}>
+            <lineBasicMaterial color="#b45309" linewidth={2} />
+          </line>
+
+          {/* 5f. Royal Crimson Wax Seal attached to the flap apex */}
+          <group ref={sealRef} position={[0, -0.34, 0.010]}>
+            <mesh rotation-x={Math.PI / 2}>
+              <cylinderGeometry args={[0.13, 0.14, 0.02, 32]} />
+              <meshPhysicalMaterial
+                color="#881337"
+                roughness={0.55}
+                metalness={0.05}
+                sheen={0.45}
+                sheenColor={new THREE.Color('#fda4af')}
+              />
+            </mesh>
+            <mesh position={[0, 0, 0.012]} scale={[0.065, 0.065, 0.035]}>
+              <sphereGeometry args={[1, 16, 12]} />
+              <meshStandardMaterial color="#f59e0b" roughness={0.35} metalness={0.6} />
+            </mesh>
+          </group>
         </group>
 
-        {/* 5f. Subtle, elegant reminder badge beside the letter */}
-        <Html position={[0.78, 0.04, 0.02]} center distanceFactor={6.2}>
-          <div className="px-2.5 py-1 rounded-full bg-stone-900/85 backdrop-blur-md border border-amber-400/40 text-[11px] font-semibold text-amber-200 shadow-lg shadow-black/50 flex items-center gap-1.5 whitespace-nowrap select-none pointer-events-none animate-pulse">
-            <span>✨</span>
-            <span>Chạm để mở</span>
-            <span>💌</span>
-          </div>
-        </Html>
+        {/* 5g. Subtle, elegant reminder badge beside the letter (fades when opening) */}
+        {!isOpening && (
+          <Html position={[0.82, 0.06, 0.02]} center distanceFactor={6.2}>
+            <div className="px-2.5 py-1 rounded-full bg-stone-900/85 backdrop-blur-md border border-amber-400/40 text-[11px] font-semibold text-amber-200 shadow-lg shadow-black/50 flex items-center gap-1.5 whitespace-nowrap select-none pointer-events-none animate-pulse">
+              <span>✨</span>
+              <span>Chạm để mở</span>
+              <span>💌</span>
+            </div>
+          </Html>
+        )}
       </group>
     </>
   );
